@@ -1,0 +1,56 @@
+﻿@model ShopStock.Web.ViewModels.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "ثبت نام";
+}
+
+<!-- start of auth-container -->
+<div class="auth-container">
+    <div class="auth-title mb-3">ثبت نام</div>
+    <!-- start of auth-box -->
+    <div class="auth-box ui-box">
+        <!-- start of auth-form -->
+        <form asp-action="Register" class="auth-form">
+            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+            <!-- start of form-element -->
+            <div class="form-element-row mb-3">
+                <input asp-for="UserName" dir="ltr" class="form-control rtl-placeholder" placeholder="نام کاربری را وارد کنید">
+            </div>
+            <div class="form-element-row mb-3">
+                <input asp-for="Email" dir="ltr" class="form-control rtl-placeholder" placeholder="ایمیل را وارد کنید">
+            </div>
+            <div class="form-element-row mb-3">
+                <input asp-for="Password" dir="ltr" class="form-control rtl-placeholder" placeholder="کلمه عبور را وارد کنید">
+            </div>
+            <div class="form-element-row mb-3">
+                <input asp-for="RePassword" dir="ltr" class="form-control rtl-placeholder" placeholder="تکرار کلمه عبور را وارد کنید">
+            </div>
+            <!-- end of form-element -->
+            <!-- start of form-element -->
+            <div class="form-element-row mb-3">
+                <button class="btn btn-primary">ثبت نام</button>
+            </div>
+            <!-- end of form-element -->
+            <!-- start of form-element -->
+            <div class="form-element-row">
+                <div class="mb-3">
+                    با ورود و یا ثبت نام در سایت شما
+                    <a href="#" class="link">
+                        شرایط و
+                        قوانین
+                    </a> استفاده
+                    از تمام سرویس های
+                    سایت و <a href="#" class="link">قوانین حریم خصوصی</a> آن را می‌پذیرید.
+                </div>
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+            <!-- end of form-element -->
+        </form>
+    <!-- end of auth-form -->
+</div>
+<!-- end of auth-box -->
+</div>
+<!-- start of auth-container -->
+@section Script
+{
+    <partial name="_ValidationScriptsPartial" />
+}

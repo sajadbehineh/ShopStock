@@ -1,0 +1,127 @@
+/* Write your code here */
+/*# sourceMappingURL=custom.css.map */
+.rtl-placeholder::placeholder
+{
+    direction: rtl;
+    text-align: right;
+}
+
+/* #region RememberMe CheckBox */
+.remember-me
+{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+}
+
+    .remember-me input[type="checkbox"]
+    {
+        margin: 0;
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .remember-me label
+    {
+        margin: 0;
+        cursor: pointer;
+        user-select: none;
+    }
+/* #endregion */
+
+/* #region LoggedInUser */
+.user-options--guest .user-option--auth-links
+{
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-inline-start: .75rem;
+    white-space: nowrap;
+}
+
+.user-options--guest .auth-link
+{
+    font-size: .92rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all .2s ease;
+    color: #2b2b2b;
+}
+
+    .user-options--guest .auth-link:hover
+    {
+        color: var(--bs-primary, #0d6efd);
+    }
+
+.user-options--guest .auth-link--register
+{
+    color: var(--bs-primary, #0d6efd);
+}
+
+.user-options--guest .auth-divider
+{
+    color: #b5b5b5;
+    font-weight: 400;
+}
+
+/* موبایل */
+@media (max-width: 767.98px)
+{
+    .user-options--guest .user-option--auth-links
+    {
+        gap: .35rem;
+        margin-inline-end: .4rem;
+    }
+
+    .user-options--guest .auth-link
+    {
+        font-size: .84rem;
+        font-weight: 600;
+    }
+
+    .user-options--guest .auth-divider
+    {
+        font-size: .8rem;
+    }
+}
+
+/* #endregion */
+
+/* #region Active UserPanel Navbar Item Style */
+.my-active
+{
+    background-color: #f8f9fa !important; /* رنگ پس‌زمینه دلخواه */
+    color: #0d6efd !important; /* رنگ متن دلخواه */
+    border-right: 3px solid #0d6efd; /* ایجاد یک خط رنگی کنار منو */
+}
+/* #endregion */
+
+/* #region File Input Style To Choose File */
+input[type="file"].form-control
+{
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 2.3; /* این مقدار متن No file chosen را عمودی وسط‌چین می‌کند */
+    height: calc(2.5rem + 2px); /* هماهنگ کردن ارتفاع با بقیه اینپوت‌ها */
+}
+
+input[type="file"].form-control::-webkit-file-upload-button
+{
+    height: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+input[type="file"].form-control::file-selector-button
+{
+    height: 100% !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+/* #endregion */

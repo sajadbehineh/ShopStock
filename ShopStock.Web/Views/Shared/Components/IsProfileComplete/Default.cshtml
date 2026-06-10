@@ -1,0 +1,13 @@
+﻿@model bool
+@if (!Model)
+{
+    <div class="alert alert-warning alert-dismissible fade show mb-5" role="alert">
+        <div>
+            جهت استفاده بهتر از امکانات سایت، لطفا پروفایل خود را تکمیل کنید.
+            <a href="@Url.Action("Index", "Profile")" class="alert-link">پروفایل من</a>.
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}

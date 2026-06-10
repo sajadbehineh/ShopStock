@@ -1,0 +1,96 @@
+﻿@{
+    ViewData["Title"] = "ثبت نام موفق";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+                <div class="card-body p-5 text-center">
+
+                    <!-- Success Icon -->
+                    <div class="mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-success bg-opacity-10 rounded-circle"
+                             style="width:100px;height:100px;">
+                            <i class="bi bi-check-circle-fill text-success fs-1"></i>
+                        </div>
+                    </div>
+
+                    <!-- Title -->
+                    <h1 class="fw-bold text-success mb-3">
+                        ثبت نام با موفقیت انجام شد
+                    </h1>
+
+                    <h5 class="mb-4">
+                        @ViewBag.UserName عزیز، خوش آمدید 👋
+                    </h5>
+
+                    <!-- Message -->
+                    <p class="text-muted fs-5 mb-4">
+                        حساب کاربری شما با موفقیت ایجاد شد.
+                    </p>
+
+                    <div class="alert alert-light border rounded-3 text-start">
+                        <p class="mb-2">
+                            <strong>ایمیل فعال‌سازی</strong> به آدرس زیر ارسال شده است:
+                        </p>
+
+                        <div class="fw-bold text-primary">
+                            @ViewBag.Email
+                        </div>
+                    </div>
+
+                    <!-- Steps -->
+                    <div class="text-start mt-4">
+                        <h6 class="fw-bold mb-3">مراحل بعدی:</h6>
+
+                        <div class="d-flex mb-3">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill">1</span>
+                            </div>
+                            <div>
+                                صندوق ورودی ایمیل خود را بررسی کنید.
+                            </div>
+                        </div>
+
+                        <div class="d-flex mb-3">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill">2</span>
+                            </div>
+                            <div>
+                                روی لینک فعال‌سازی ارسال شده کلیک کنید.
+                            </div>
+                        </div>
+
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <span class="badge bg-primary rounded-pill">3</span>
+                            </div>
+                            <div>
+                                پس از فعال‌سازی، وارد حساب کاربری خود شوید.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="alert alert-warning mt-4 mb-0">
+                        اگر ایمیلی دریافت نکردید، پوشه
+                        <strong>Spam / Junk</strong>
+                        را نیز بررسی کنید.
+                    </div>
+
+                </div>
+
+                <div class="card-footer bg-light text-center py-3">
+                    <a class="btn btn-primary px-4">
+                        ورود به حساب کاربری
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

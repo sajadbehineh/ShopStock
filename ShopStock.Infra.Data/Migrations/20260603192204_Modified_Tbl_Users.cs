@@ -1,0 +1,49 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace ShopStock.Infra.Data.Migrations
+{
+    /// <inheritdoc />
+    public partial class Modified_Tbl_Users : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Mobile",
+                table: "Users",
+                column: "Mobile",
+                unique: true,
+                filter: "[Mobile] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_UserName",
+                table: "Users",
+                column: "UserName",
+                unique: true);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropIndex(
+                name: "IX_Users_Email",
+                table: "Users");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Users_Mobile",
+                table: "Users");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Users_UserName",
+                table: "Users");
+        }
+    }
+}

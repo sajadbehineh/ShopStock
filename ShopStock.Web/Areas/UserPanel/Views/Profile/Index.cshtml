@@ -1,0 +1,84 @@
+@model ShopStock.Web.Areas.UserPanel.Models.ProfileViewModel
+
+@{
+    ViewData["Title"] = "ویرایش پروفایل";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- استفاده از کلاس ui-box برای هماهنگی با تم سایت -->
+        <div class="ui-box p-4">
+            <h4 class="mb-4">@ViewData["Title"]</h4>
+            <hr />
+
+            <form asp-action="Index" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <!-- نام و نام خانوادگی -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="FirstName" class="form-label"></label>
+                        <input asp-for="FirstName" class="form-control" placeholder="نام" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="LastName" class="form-label"></label>
+                        <input asp-for="LastName" class="form-control" placeholder="نام خانوادگی" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <!-- موبایل و کد ملی -->
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Mobile" class="form-label"></label>
+                        <input asp-for="Mobile" dir="ltr" class="form-control" placeholder="09xxxxxxxxx" />
+                        <span asp-validation-for="Mobile" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="NationalCode" class="form-label"></label>
+                        <input asp-for="NationalCode" dir="ltr" class="form-control  rtl-placeholder" placeholder="کد ملی" />
+                        <span asp-validation-for="NationalCode" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="preview-image-group row align-items-center mb-4">
+                    <div class="col-md-8 mb-3 mb-md-0">
+                        <label asp-for="ProfilePicture" class="form-label"></label>
+                        <div class="input-group">
+                            <input asp-for="ProfilePicture" type="file" class="form-control preview-input" accept="image/*" />
+
+                            <button class="btn btn-outline-danger preview-remove-btn" type="button" title="حذف عکس">
+                                <i class="bi bi-trash"></i> حذف عکس
+                            </button>
+                        </div>
+                        <div class="form-text mt-1">فرمت‌های مجاز: JPG, PNG</div>
+                        <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-4 text-center">
+                        <img class="rounded-circle img-thumbnail preview-box"
+                             src="@Model.CurrentPicturePath"
+                             data-default-src="/Storage/ProfilePictures/no-image.jpg"
+                             style="width: 100px; height: 100px; object-fit: cover;" alt="پیش‌نمایش" />
+                    </div>
+
+                    <input type="hidden" class="preview-delete-marker" name="deleteCurrentPicture" value="false" />
+                </div>
+
+                <!-- دکمه -->
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-success btn-lg px-5">ذخیره تغییرات</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Script {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script src="~/js/plugins/image-upload-preview.js" asp-append-version="true"></script>
+}

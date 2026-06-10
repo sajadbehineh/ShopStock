@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "_EshopLayout";
+}
+<div class="container">
+    <div class="row mb-5">
+        <div class="col-xl-3 col-lg-4 col-md-5 mb-md-0 mb-4">
+            @await Component.InvokeAsync("UserPanel")
+        </div>
+        <div class="col-xl-9 col-lg-8 col-md-7">
+            @await Component.InvokeAsync("IsProfileComplete")
+            @RenderBody()
+        </div>
+    </div>
+</div>
+@section Script {
+    @RenderSection("Script", required: false)
+}
