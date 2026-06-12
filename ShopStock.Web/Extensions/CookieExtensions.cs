@@ -18,9 +18,9 @@ namespace ShopStock.Web.Extensions
             // Step 1: Authenticate the current user to get existing claims
             var authenticateResult = await httpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            var identity = authenticateResult?.Principal.Identities as ClaimsIdentity
-                           ?? httpContext.User.Identity as ClaimsIdentity;
-            if (identity == null)
+            //var identity = authenticateResult?.Principal?.Identity as ClaimsIdentity
+            //               ?? httpContext.User.Identity as ClaimsIdentity;
+            if ((authenticateResult?.Principal?.Identity ?? httpContext.User.Identity) is not ClaimsIdentity identity)
                 return;
 
             // Step 2: Keep existing claims except the ones we want to update

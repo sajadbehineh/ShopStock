@@ -3,11 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ShopStock.Web.Areas.Admin.Controllers
 {
-    public class HomeController : AdminBaseController
+    [Area("Admin")]
+    [Authorize]
+    public class AdminBaseController: Controller
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
     }
 }

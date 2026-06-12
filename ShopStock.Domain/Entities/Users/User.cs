@@ -1,4 +1,5 @@
 ﻿using ShopStock.Domain.Entities.Common;
+using ShopStock.Domain.Entities.Relations;
 
 namespace ShopStock.Domain.Entities.Users;
 
@@ -18,6 +19,7 @@ public class User : BaseEntity
     public bool IsActive { get; set; }
 
     #region Relations
-    public ICollection<UserAddress> UserAddresses { get; set; }
+    public ICollection<UserAddress> UserAddresses { get; set; } = new HashSet<UserAddress>();
+    public ICollection<UserRole> UserRoles { get; set; } = new HashSet<UserRole>();
     #endregion
 }

@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ShopStock.Application.Contracts;
-using ShopStock.Web.Extensions;
-using ShopStock.Web.ViewModels.Account;
 
 namespace ShopStock.Web.ViewComponents
 {

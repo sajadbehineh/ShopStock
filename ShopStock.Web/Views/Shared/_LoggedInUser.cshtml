@@ -2,7 +2,7 @@
 {
     <div class="user-options">
         <div class="user-option user-option--account">
-            <a asp-area="UserPanel" class="user-option-btn user-option-btn--account">
+            <a asp-area="UserPanel" asp-controller="Home" asp-action="Index" class="user-option-btn user-option-btn--account">
                 <i class="ri-user-fill icon"></i>
                 <i class="ri-arrow-down-s-fill icon fs-7 text-muted"></i>
             </a>
@@ -15,7 +15,7 @@
                                 @* <img src="/Storage/ProfilePictures/311b45a0de344cc9bdb0433ead66807f.jpg"> *@
                             </div>
                             <div class="profile-info">
-                                <a asp-area="UserPanel" class="text-decoration-none text-dark fw-bold mb-2">
+                                <a asp-area="UserPanel" asp-controller="Home" asp-action="Index" class="text-decoration-none text-dark fw-bold mb-2">
                                     @{
                                         string? fullName = User.FindFirst("FullName")?.Value;
                                         string? showName = fullName.Trim() != "" ? fullName : User.Identity.Name;

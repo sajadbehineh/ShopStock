@@ -23,13 +23,16 @@ namespace ShopStock.Infra.Data.Configurations.UserConfig
             builder.Property(u => u.PasswordHash).IsRequired().HasMaxLength(400);
 
             builder.HasIndex(u => u.UserName).IsUnique();
-            builder.HasIndex(u => u.Email).IsUnique(); 
+            builder.HasIndex(u => u.Email).IsUnique();
             builder.HasIndex(u => u.Mobile).IsUnique();
 
             #endregion
 
             #region Relations
-
+            builder
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId);
             #endregion
         }
     }
