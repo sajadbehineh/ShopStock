@@ -8,8 +8,8 @@ namespace ShopStock.Domain.Enums
     {
         Success,
         InvalidInputs,
-        EmailAlreadyExists,
-        UserNameAlreadyExists,
+        EmailDuplicated,
+        UserNameDuplicated,
         ActivationEmailSent,
         Failed,
         FailedActivationEmailSending

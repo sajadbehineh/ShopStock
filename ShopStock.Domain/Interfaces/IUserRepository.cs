@@ -11,8 +11,11 @@ namespace ShopStock.Domain.Interfaces
         Task DeleteAsync(User user);
         Task DeleteAsync(int userId);
 
+        Task AddUserToRolesAsync(int userId, IEnumerable<int> roleIds);
+
         Task<bool> IsUserNameExistsAsync(string userName);
         Task<bool> IsEmailExistsAsync(string email);
+        Task<bool> IsMobileExistsAsync(string mobile);
 
         Task<User?> GetUserByActiveCodeAsync(string activeCode);
         Task<User?> GetUserByUserNameOrEmailAsync(string userNameOrEmail);

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ShopStock.Domain.Entities.Relations;
 using ShopStock.Domain.Entities.Users;
 using ShopStock.Domain.Interfaces;
 using ShopStock.Infra.Data.Context;
@@ -45,6 +46,16 @@ namespace ShopStock.Infra.Data.Repositories
             }
         }
 
+        public Task AddUserToRolesAsync(int userId, IEnumerable<int> roleIds)
+        {
+            foreach (int roleId in roleIds)
+            {
+                context.UserRoles.Add(new UserRole() { UserId = userId, RoleId = roleId });
+            }
+
+            return Task.CompletedTask;
+        }
+
         public async Task<bool> IsUserNameExistsAsync(string userName)
         {
             return await context.Users.AnyAsync(u => u.UserName == userName);
@@ -53,6 +64,11 @@ namespace ShopStock.Infra.Data.Repositories
         public async Task<bool> IsEmailExistsAsync(string email)
         {
             return await context.Users.AnyAsync(u => u.Email == email);
+        }
+
+        public async Task<bool> IsMobileExistsAsync(string mobile)
+        {
+            return await context.Users.AnyAsync(u => u.Mobile == mobile);
         }
 
         public async Task<User?> GetUserByActiveCodeAsync(string activeCode)

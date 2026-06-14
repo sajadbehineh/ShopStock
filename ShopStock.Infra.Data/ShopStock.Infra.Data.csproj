@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ShopStock.Application\ShopStock.Application.csproj" />
     <ProjectReference Include="..\ShopStock.Domain\ShopStock.Domain.csproj" />
   </ItemGroup>
 

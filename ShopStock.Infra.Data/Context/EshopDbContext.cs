@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ShopStock.Domain.Entities.Relations;
 using ShopStock.Domain.Entities.Roles;
 using ShopStock.Domain.Entities.Users;
 
@@ -14,6 +15,7 @@ namespace ShopStock.Infra.Data.Context
 
         #region Roles
         public DbSet<Role> Roles { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

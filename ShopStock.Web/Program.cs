@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.FileProviders;
 using ShopStock.Application;
 using ShopStock.Infra.Data;
-using System.Security.Claims;
 
 // TODO: add ILogger and ILoggerFactory to log errors and important events in the application
 

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ShopStock.Web.Areas.UserPanel.Models
+namespace ShopStock.Web.Areas.UserPanel.ViewModels
 {
     public class ProfileViewModel
     {

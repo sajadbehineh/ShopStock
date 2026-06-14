@@ -32,12 +32,12 @@ namespace ShopStock.Application.Services
 
             if (await _userRepository.IsUserNameExistsAsync(dto.UserName.FixUserName()))
             {
-                return RegisterUserResult.UserNameAlreadyExists;
+                return RegisterUserResult.UserNameDuplicated;
             }
 
             if (await _userRepository.IsEmailExistsAsync(dto.Email.FixEmail()))
             {
-                return RegisterUserResult.EmailAlreadyExists;
+                return RegisterUserResult.EmailDuplicated;
             }
             #endregion
 
@@ -174,7 +174,7 @@ namespace ShopStock.Application.Services
         public async Task<(bool IsSuccess, string ProfilePicture)> EditProfileAsync(EditProfileDto dto)
         {
             var user = await _userRepository.GetUserByIdAsync(dto.UserId);
-            if (user == null) return (false, "no-image.jpg");
+            if (user == null) return (false, "NoPhoto.jpg");
 
             // 1- Update basic information
             user.FirstName = dto.FirstName;
@@ -187,10 +187,10 @@ namespace ShopStock.Application.Services
             // 2-1. delete current picture if requested
             if (dto.RemoveCurrentPicture)
             {
-                if (user.ProfilePicture != "no-image.jpg")
+                if (user.ProfilePicture != "NoPhoto.jpg")
                 {
                     _imageService.DeleteImage(user?.ProfilePicture, "ProfilePictures");
-                    user.ProfilePicture = "no-image.jpg"; // set to default image
+                    user.ProfilePicture = "NoPhoto.jpg"; // set to default image
                 }
             }
 
@@ -199,7 +199,7 @@ namespace ShopStock.Application.Services
             {
                 // delete current picture if it's not the default one
                 
-                if (user.ProfilePicture != "no-image.jpg")
+                if (user.ProfilePicture != "NoPhoto.jpg")
                 {
                     _imageService.DeleteImage(user.ProfilePicture, "ProfilePictures");
                 }

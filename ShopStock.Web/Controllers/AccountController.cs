@@ -65,10 +65,10 @@ namespace ShopStock.Web.Controllers
                 case RegisterUserResult.Success:
                     return RedirectToAction("RegistrationSuccess",
                         new { email = registerDto.Email, userName = registerDto.UserName, returnUrl = returnUrl });
-                case RegisterUserResult.UserNameAlreadyExists:
+                case RegisterUserResult.UserNameDuplicated:
                     ModelState.AddModelError("UserName", "نام کاربری وارد شده تکراری است.");
                     break;
-                case RegisterUserResult.EmailAlreadyExists:
+                case RegisterUserResult.EmailDuplicated:
                     ModelState.AddModelError("Email", "ایمیل وارد شده تکراری است.");
                     break;
                 case RegisterUserResult.InvalidInputs:

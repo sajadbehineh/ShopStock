@@ -2,23 +2,27 @@
 {
     public static class StringExtensions
     {
-        extension(string email)
+        public static string FixEmail(this string email)
         {
-            public string FixEmail()
-            {
-                if (string.IsNullOrWhiteSpace(email))
-                    return string.Empty;
+            if (string.IsNullOrWhiteSpace(email))
+                return string.Empty;
 
-                return email.Trim().ToLower();
-            }
+            return email.Trim().ToLower();
+        }
 
-            public string FixUserName()
-            {
-                if (string.IsNullOrWhiteSpace(email))
-                    return string.Empty;
+        public static string FixUserName(this string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                return string.Empty;
 
-                return email.Trim();
-            }
+            return userName.Trim();
+        }
+
+        public static string FixMobile(this string mobile)
+        {
+            if (string.IsNullOrWhiteSpace(mobile))
+                return string.Empty;
+            return mobile.Trim();
         }
     }
 }
