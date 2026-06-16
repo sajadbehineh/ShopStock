@@ -1,17 +1,13 @@
 ﻿using SkiaSharp;
-using ShopStock.Application.Contracts;
+using ShopStock.Application.Services.Interfaces;
 
-namespace ShopStock.Application.Services;
+namespace ShopStock.Application.Services.Implementations;
 
 public class ImageService : IImageService
 {
-    private readonly string _baseStoragePath;
+    private readonly string _baseStoragePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Uploads_Storage");
 
-    public ImageService()
-    {
-        // مسیر ذخیره‌سازی در پوشه ای خارج از پروژه وب
-        _baseStoragePath = Path.Combine(Directory.GetCurrentDirectory(), "..", "Uploads_Storage");
-    }
+    // مسیر ذخیره‌سازی در پوشه ای خارج از پروژه وب
 
     public async Task<string> SaveImageAsync(Stream fileStream, string folderName, int width = 512, int height = 512)
     {

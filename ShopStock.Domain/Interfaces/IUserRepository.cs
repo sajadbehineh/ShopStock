@@ -6,6 +6,7 @@ namespace ShopStock.Domain.Interfaces
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
+        Task<User?> GetUserWithRolesAsync(int userId);
         Task CreateAsync(User user);
         Task UpdateAsync(User user);
         Task DeleteAsync(User user);

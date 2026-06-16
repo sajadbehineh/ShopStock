@@ -14,6 +14,7 @@ namespace ShopStock.Infra.Data
                 options.UseSqlServer(connectionString));
 
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IRoleRepository, RoleRepository>();
 
             return services;
         }

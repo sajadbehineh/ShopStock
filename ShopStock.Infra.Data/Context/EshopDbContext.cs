@@ -22,6 +22,8 @@ namespace ShopStock.Infra.Data.Context
         {
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<UserRole>().ToTable("UserRole");
         }
     }
 }

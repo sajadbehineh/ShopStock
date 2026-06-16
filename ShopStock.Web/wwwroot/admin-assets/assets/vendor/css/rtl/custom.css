@@ -1,0 +1,25 @@
+﻿.left-panel
+{
+    position: sticky;
+    top: 90px;
+}
+
+/*.validation-message
+{
+    display: block;
+    min-height: 5px;
+    font-size: .875rem;
+}*/
+
+.profile-preview
+{
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+}
+
+.roles-container
+{
+    max-height: 350px;
+    overflow-y: auto;
+}

@@ -4,94 +4,122 @@
     ViewData["Title"] = "لیست کاربران";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">@ViewData["Title"]</h5>
 
-<p>
-    <a asp-action="Create">افزودن کاربر جدید</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.ProfilePicture)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FirstName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LastName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UserName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Mobile)
-            </th>
-            @* <th>
-            @Html.DisplayNameFor(model => model.NationalCode)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.PasswordHash)
-        </th> *@
-            <th>
-                @Html.DisplayNameFor(model => model.IsActive)
-            </th>
-            <th>
-                تاریخ ایجاد / ویرایش
-            </th>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bx bx-plus"></i>
+            افزودن کاربر
+        </a>
+    </div>
 
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    <img src="/Storage/ProfilePictures/@item.ProfilePicture" />
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.FirstName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.LastName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UserName)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Email)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Mobile)
-                </td>
-                @*  <td>
-                    @Html.DisplayFor(modelItem => item.NationalCode)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.PasswordHash)
-                </td> *@
-                <td>
-                    @Html.DisplayFor(modelItem => item.IsActive)
-                </td>
-                <td>
-                    @item.CreatedAt.ToShamsi()
-                    <br />
-                    @if (item.UpdatedAt != null)
-                    {
-                        @item.UpdatedAt.Value.ToShamsi()
-                    }
-                </td>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.ProfilePicture)</th>
+                    <th>@Html.DisplayNameFor(model => model.FirstName)</th>
+                    <th>@Html.DisplayNameFor(model => model.LastName)</th>
+                    <th>@Html.DisplayNameFor(model => model.UserName)</th>
+                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                    <th>@Html.DisplayNameFor(model => model.Mobile)</th>
+                    <th>@Html.DisplayNameFor(model => model.NationalCode)</th>
+                    <th>@Html.DisplayNameFor(model => model.IsActive)</th>
+                    <th>تاریخ ایجاد / ویرایش</th>
+                    <th class="text-center">عملیات</th>
+                </tr>
+            </thead>
 
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">ویرایش</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">جزئیات</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">حذف</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+            <tbody class="table-border-bottom-0">
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            <div class="avatar avatar-sm">
+                                @if (!string.IsNullOrEmpty(item.ProfilePicture))
+                                {
+                                    <img src="/Storage/ProfilePictures/@item.ProfilePicture"
+                                         class="rounded-circle"
+                                         alt="profile" />
+                                }
+                                else
+                                {
+                                    <span class="avatar-initial rounded-circle bg-label-secondary">
+                                        <i class="bx bx-user"></i>
+                                    </span>
+                                }
+                            </div>
+                        </td>
+
+                        <td>@item.FirstName</td>
+                        <td>@item.LastName</td>
+                        <td class="fw-semibold">@item.UserName</td>
+                        <td>@item.Email</td>
+                        <td>@item.Mobile</td>
+                        <td>@item.NationalCode</td>
+
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-label-success">فعال</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-label-danger">غیرفعال</span>
+                            }
+                        </td>
+
+                        <td class="small">
+                            @item.CreatedAt.ToShamsi()
+                            <br />
+                            @if (item.UpdatedAt != null)
+                            {
+                                <span class="text-muted">@item.UpdatedAt.Value.ToShamsi()</span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button type="button"
+                                        class="btn p-0 dropdown-toggle hide-arrow"
+                                        data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+
+                                <div class="dropdown-menu">
+
+                                    <a class="dropdown-item"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id">
+                                        <i class="bx bx-edit-alt me-1"></i>
+                                        ویرایش
+                                    </a>
+
+                                    <a class="dropdown-item"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Id">
+                                        <i class="bx bx-show me-1"></i>
+                                        جزئیات
+                                    </a>
+
+                                    <a class="dropdown-item text-danger"
+                                       asp-action="Delete"
+                                       asp-route-id="@item.Id">
+                                        <i class="bx bx-trash me-1"></i>
+                                        حذف
+                                    </a>
+
+                                </div>
+                            </div>
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>

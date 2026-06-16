@@ -23,7 +23,7 @@ namespace ShopStock.Application.Mappers
             };
         }
 
-        public static User? MapToUser(this AdminCreateUserDto dto)
+        public static User? MapToUser(this CreateUserDto dto)
         {
             if (dto == null)
                 return null;

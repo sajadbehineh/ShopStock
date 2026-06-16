@@ -1,25 +1,16 @@
-﻿using ShopStock.Application.Contracts;
-using ShopStock.Application.DTOs.Account;
+﻿using ShopStock.Application.DTOs.Account;
 using ShopStock.Application.Extensions;
 using ShopStock.Application.Generators;
 using ShopStock.Application.Mappers;
 using ShopStock.Application.Security;
 using ShopStock.Domain.Enums;
 using ShopStock.Domain.Interfaces;
+using ShopStock.Application.Services.Interfaces;
 
-namespace ShopStock.Application.Services
+namespace ShopStock.Application.Services.Implementations
 {
-    public class AccountService : IAccountService
+    public class AccountService(IUserRepository userRepository, IImageService imageService) : IAccountService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IImageService _imageService;
-
-        public AccountService(IUserRepository userRepository, IImageService imageService)
-        {
-            _userRepository = userRepository;
-            _imageService = imageService;
-        }
-
         #region Register User
 
         public async Task<RegisterUserResult> RegisterAsync(RegisterDto dto)
@@ -30,12 +21,12 @@ namespace ShopStock.Application.Services
                 string.IsNullOrWhiteSpace(dto.Password))
                 return RegisterUserResult.InvalidInputs;
 
-            if (await _userRepository.IsUserNameExistsAsync(dto.UserName.FixUserName()))
+            if (await userRepository.IsUserNameExistsAsync(dto.UserName.FixUserName()))
             {
                 return RegisterUserResult.UserNameDuplicated;
             }
 
-            if (await _userRepository.IsEmailExistsAsync(dto.Email.FixEmail()))
+            if (await userRepository.IsEmailExistsAsync(dto.Email.FixEmail()))
             {
                 return RegisterUserResult.EmailDuplicated;
             }
@@ -50,8 +41,8 @@ namespace ShopStock.Application.Services
             user.ProfilePicture = "NoPhoto.jpg";
             user.CreatedAt = DateTime.Now;
 
-            await _userRepository.CreateAsync(user);
-            await _userRepository.SaveAsync();
+            await userRepository.CreateAsync(user);
+            await userRepository.SaveAsync();
             return RegisterUserResult.Success;
 
             #endregion
@@ -71,7 +62,7 @@ namespace ShopStock.Application.Services
                 return result;
             }
 
-            var user = await _userRepository.GetUserByUserNameOrEmailAsync(dto.UserNameOrEmail);
+            var user = await userRepository.GetUserByUserNameOrEmailAsync(dto.UserNameOrEmail);
             if (user == null)
             {
                 result.Status = LoginUserResult.UserNotFound;
@@ -126,13 +117,13 @@ namespace ShopStock.Application.Services
         {
             if (string.IsNullOrWhiteSpace(activeCode)) return false;
 
-            var user = await _userRepository.GetUserByActiveCodeAsync(activeCode);
+            var user = await userRepository.GetUserByActiveCodeAsync(activeCode);
             if (user == null) return false;
 
             user.IsEmailActive = true;
             user.EmailActiveCode = TokenGenerator.GenerateUniqueToken();
 
-            await _userRepository.SaveAsync();
+            await userRepository.SaveAsync();
             return true;
         }
 
@@ -142,14 +133,14 @@ namespace ShopStock.Application.Services
 
         public async Task<bool> ChangePasswordAsync(ChangePasswordDto dto)
         {
-            var user = await _userRepository.GetUserByIdAsync(dto.UserId);
+            var user = await userRepository.GetUserByIdAsync(dto.UserId);
             if (user == null) throw new Exception("کاربر یافت نشد");
 
             if (!PasswordHelper.VerifyPassword(dto.OldPassword, user.PasswordHash))
                 return false;
 
             user.PasswordHash = dto.NewPassword.HashPassword();
-            await _userRepository.SaveAsync();
+            await userRepository.SaveAsync();
             return true;
         }
 
@@ -159,7 +150,7 @@ namespace ShopStock.Application.Services
 
         public async Task<bool> IsProfileComplete(int usrId)
         {
-            var user = await _userRepository.GetUserByIdAsync(usrId);
+            var user = await userRepository.GetUserByIdAsync(usrId);
             if (user.Mobile != null && user.Mobile != "")
             {
                 return true;
@@ -173,7 +164,7 @@ namespace ShopStock.Application.Services
 
         public async Task<(bool IsSuccess, string ProfilePicture)> EditProfileAsync(EditProfileDto dto)
         {
-            var user = await _userRepository.GetUserByIdAsync(dto.UserId);
+            var user = await userRepository.GetUserByIdAsync(dto.UserId);
             if (user == null) return (false, "NoPhoto.jpg");
 
             // 1- Update basic information
@@ -189,7 +180,7 @@ namespace ShopStock.Application.Services
             {
                 if (user.ProfilePicture != "NoPhoto.jpg")
                 {
-                    _imageService.DeleteImage(user?.ProfilePicture, "ProfilePictures");
+                    imageService.DeleteImage(user?.ProfilePicture, "ProfilePictures");
                     user.ProfilePicture = "NoPhoto.jpg"; // set to default image
                 }
             }
@@ -201,14 +192,14 @@ namespace ShopStock.Application.Services
                 
                 if (user.ProfilePicture != "NoPhoto.jpg")
                 {
-                    _imageService.DeleteImage(user.ProfilePicture, "ProfilePictures");
+                    imageService.DeleteImage(user.ProfilePicture, "ProfilePictures");
                 }
                 // save new picture
-                var newFileName = await _imageService.SaveImageAsync(dto.ImageStream, "ProfilePictures", 250, 250);
+                var newFileName = await imageService.SaveImageAsync(dto.ImageStream, "ProfilePictures", 250, 250);
                 user.ProfilePicture = newFileName;
             }
             // 3- Save changes to database
-            await _userRepository.SaveAsync();
+            await userRepository.SaveAsync();
             return (true, user.ProfilePicture);
         }
 
@@ -218,7 +209,7 @@ namespace ShopStock.Application.Services
 
         public async Task<EditProfileDto> GetUserProfileAsync(int userId)
         {
-            var user = await _userRepository.GetUserByIdAsync(userId);
+            var user = await userRepository.GetUserByIdAsync(userId);
             if (user == null) return null;
 
             return new EditProfileDto

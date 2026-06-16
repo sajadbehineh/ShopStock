@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ShopStock.Application.Contracts
+﻿namespace ShopStock.Application.Services.Interfaces
 {
     public interface IImageService
     {

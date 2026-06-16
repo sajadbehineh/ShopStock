@@ -28,10 +28,6 @@ namespace ShopStock.Web.Areas.Admin.ViewModels.User
         [DisplayName("کد ملی")]
         public string? NationalCode { get; set; }
 
-        //[DisplayName("کلمه عبور")]
-        //[Required(ErrorMessage = "لطفاً {0} را وارد کنید")]
-        //public string PasswordHash { get; set; }
-
         [DisplayName("تصویر پروفایل")]
         public string? ProfilePicture { get; set; }
 

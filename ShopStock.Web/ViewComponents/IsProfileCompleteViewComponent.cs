@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ShopStock.Application.Contracts;
+using ShopStock.Application.Services.Interfaces;
 using ShopStock.Web.Extensions;
 
 namespace ShopStock.Web.ViewComponents

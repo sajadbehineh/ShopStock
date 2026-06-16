@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShopStock.Web.Areas.Admin.ViewModels.User;
 
-public class AdminCreateUserViewModel
+public class CreateUserViewModel
 {
     [DisplayName("نام")]
     public string? FirstName { get; set; }
@@ -22,7 +22,7 @@ public class AdminCreateUserViewModel
     public string Email { get; set; }
 
     [DisplayName("تلفن همراه")]
-    [RegularExpression(@"^09[0-9]{9}$", ErrorMessage = "شماره وارد شده صحیح نیست فرمت مثال 09126700311")]
+    [RegularExpression(@"^09[0-9]{9}$", ErrorMessage = "شماره وارد شده صحیح نیست فرمت مثال 09120001234")]
     public string? Mobile { get; set; }
 
     [DisplayName("کد ملی")]

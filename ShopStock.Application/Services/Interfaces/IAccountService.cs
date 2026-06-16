@@ -1,7 +1,7 @@
 ﻿using ShopStock.Application.DTOs.Account;
 using ShopStock.Domain.Enums;
 
-namespace ShopStock.Application.Contracts
+namespace ShopStock.Application.Services.Interfaces
 {
     public interface IAccountService
     {

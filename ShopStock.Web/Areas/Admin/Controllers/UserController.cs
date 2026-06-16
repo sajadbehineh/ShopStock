@@ -1,27 +1,25 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ShopStock.Application.Contracts;
 using ShopStock.Application.DTOs.User;
-using ShopStock.Domain.Entities.Users;
+using ShopStock.Application.Services.Interfaces;
 using ShopStock.Domain.Enums.User;
 using ShopStock.Web.Areas.Admin.ViewModels.User;
+using ShopStock.Web.Mappers;
 
 namespace ShopStock.Web.Areas.Admin.Controllers
 {
-    public class UserController : AdminBaseController
+    public class UserController(IUserService userService, IRoleService roleService)
+        : AdminBaseController
     {
-        private readonly IAdminUserService _adminUserService;
-
-        public UserController(IAdminUserService adminUserService)
-        {
-            _adminUserService = adminUserService;
-        }
-
-        // GET: Users
+        #region Get Users
         public async Task<IActionResult> Index()
         {
-            return View();
+            var users = await userService.GetUsersAsync();
+
+            var model = users.MapToListViewModels();
+
+            return View(model);
         }
+        #endregion 
 
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -41,23 +39,25 @@ namespace ShopStock.Web.Areas.Admin.Controllers
             return View();
         }
 
+        #region Create User
         [HttpGet]
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            return View();
+            var model = new CreateUserViewModel()
+            {
+                Roles = await roleService.GetAllRolesAsync()
+            };
+            return View(model);
         }
 
-        // POST: Users/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(AdminCreateUserViewModel model)
+        public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
             // Create a DTO to send to the service layer
-            var dto = new AdminCreateUserDto
+            var dto = new CreateUserDto
             {
                 FirstName = model.FirstName,
                 LastName = model.LastName,
@@ -69,11 +69,13 @@ namespace ShopStock.Web.Areas.Admin.Controllers
                 IsActive = model.IsActive,
 
                 ProfilePictureName = model.ProfilePictureName,
-                ImageStream = model.ProfilePictureFile?.OpenReadStream()
+                ImageStream = model.ProfilePictureFile?.OpenReadStream(),
+
+                UserSelectedRoles = model.UserSelectedRoles
             };
 
             // Call the service to create the user
-            var result = await _adminUserService.CreateUserAsync(dto);
+            var result = await userService.CreateUserAsync(dto);
 
             if (result == AdminCreateUserResult.Success)
                 return RedirectToAction("Index");
@@ -85,8 +87,11 @@ namespace ShopStock.Web.Areas.Admin.Controllers
             if (result == AdminCreateUserResult.EmailDuplicated)
                 ModelState.AddModelError(nameof(model.Email), "این ایمیل قبلاً ثبت شده است.");
 
+            model.Roles = await roleService.GetAllRolesAsync();
+
             return View(model);
         }
+        #endregion
 
 
         // GET: Users/Edit/5
@@ -140,38 +145,28 @@ namespace ShopStock.Web.Areas.Admin.Controllers
         //    return View(user);
         //}
 
-        // GET: Users/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null)
-        //    {
-        //        return NotFound();
-        //    }
+        #region Delete User
+        public async Task<IActionResult> Delete(int id)
+        {
+            var dto = await userService.GetUserForDeleteAsync(id);
 
-        //    var user = await _context.Users
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
+            if (dto == null)
+                return NotFound();
 
-        //    return View(user);
-        //}
+            var model = dto.MapToDeleteViewModel();
 
-        // POST: Users/Delete/5
-        //[HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> DeleteConfirmed(int id)
-        //{
-        //    var user = await _context.Users.FindAsync(id);
-        //    if (user != null)
-        //    {
-        //        _context.Users.Remove(user);
-        //    }
+            return View(model);
+        }
 
-        //    await _context.SaveChangesAsync();
-        //    return RedirectToAction(nameof(Index));
-        //}
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(DeleteUserViewModel model)
+        {
+            await userService.DeleteUserAsync(model.Id);
+
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
 
         //private bool UserExists(int id)
         //{

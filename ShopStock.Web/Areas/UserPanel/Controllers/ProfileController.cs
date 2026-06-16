@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ShopStock.Application.Contracts;
+using ShopStock.Application.Services.Interfaces;
 using ShopStock.Application.DTOs.Account;
 using ShopStock.Web.Areas.UserPanel.ViewModels;
 using ShopStock.Web.Extensions;

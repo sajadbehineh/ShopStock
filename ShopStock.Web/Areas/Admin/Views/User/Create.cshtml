@@ -1,81 +1,231 @@
-@model ShopStock.Web.Areas.Admin.ViewModels.User.AdminCreateUserViewModel
+@model ShopStock.Web.Areas.Admin.ViewModels.User.CreateUserViewModel
 
 @{
     ViewData["Title"] = "افزودن کاربر جدید";
 }
 
-<h1>@ViewData["Title"]</h1>
+<form asp-action="Create" enctype="multipart/form-data" method="post">
 
-<h4>User</h4>
-<hr />
-<div class="row">
-    <div class="col-md-7">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="FirstName" class="control-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LastName" class="control-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UserName" class="control-label"></label>
-                <input asp-for="UserName" class="form-control" />
-                <span asp-validation-for="UserName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Mobile" class="control-label"></label>
-                <input asp-for="Mobile" class="form-control" />
-                <span asp-validation-for="Mobile" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="NationalCode" class="control-label"></label>
-                <input asp-for="NationalCode" class="form-control" />
-                <span asp-validation-for="NationalCode" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ProfilePictureName" class="control-label"></label>
-                <input asp-for="ProfilePictureName" class="form-control" />
-                <span asp-validation-for="ProfilePictureName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ProfilePictureFile" class="control-label"></label>
-                <input asp-for="ProfilePictureFile" class="form-control" />
-                <span asp-validation-for="ProfilePictureFile" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="IsActive" /> @Html.DisplayNameFor(model => model.IsActive)
-                </label>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-4"></div>
+
+    <div class="row">
+
+        <!-- Left Panel -->
+        <div class="col-lg-4">
+
+            <div class="left-panel">
+
+                <!-- Profile Picture -->
+                <div class="card mb-4 preview-image-group">
+
+                    <div class="card-header">
+                        <h5 class="mb-0">تصویر پروفایل</h5>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="mb-4 d-flex justify-content-center">
+                            <img class="rounded-circle img-thumbnail preview-box profile-preview"
+                                 src="/Storage/ProfilePictures/NoPhoto.jpg"
+                                 data-default-src="/Storage/ProfilePictures/NoPhoto.jpg">
+                        </div>
+
+                        <div class="form-group">
+
+                            <label asp-for="ProfilePictureFile" class="form-label"></label>
+
+                            <div class="input-group">
+
+                                <input asp-for="ProfilePictureFile"
+                                       class="form-control preview-input"
+                                       type="file"
+                                       accept="image/*">
+
+                                <button type="button"
+                                        class="btn btn-outline-danger preview-remove-btn">
+                                    حذف عکس
+                                </button>
+
+                            </div>
+
+                            <div class="form-text mt-2">
+                                فرمت‌های مجاز: JPG, PNG
+                            </div>
+
+                            <span asp-validation-for="ProfilePictureFile"
+                                  class="text-danger validation-message"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Roles -->
+                @if (Model.Roles != null && Model.Roles.Any())
+                {
+                    <div class="card">
+
+                        <div class="card-header">
+                            <h5 class="mb-0">نقش‌های کاربر</h5>
+                        </div>
+
+                        <div class="card-body roles-container">
+
+                            <div class="row">
+
+                                @foreach (var role in Model.Roles)
+                                {
+                                    <div class="col-md-6 mb-3">
+
+                                        <div class="form-check custom-option custom-option-basic">
+
+                                            <label class="form-check-label custom-option-content">
+
+                                                <input class="form-check-input"
+                                                       name="UserSelectedRoles"
+                                                       type="checkbox"
+                                                       value="@role.Id"
+                                                @((Model.UserSelectedRoles != null && Model.UserSelectedRoles.Contains(role.Id)) ? "checked" : "")>
+
+                                                <span class="custom-option-header">
+
+                                                    <span class="h6 mb-0">
+                                                        @role.RoleName
+                                                    </span>
+
+                                                </span>
+
+                                            </label>
+
+                                        </div>
+
+                                    </div>
+                                }
+
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+
             </div>
 
-            <div class="form-group">
-                <input type="submit" value="افزودن کاربر" class="btn btn-primary" />
+        </div>
+
+
+        <!-- Form -->
+        <div class="col-lg-8">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <h5 class="mb-0">
+                        افزودن کاربر جدید
+                    </h5>
+
+                </div>
+
+                <div class="card-body">
+
+                    <div class="mb-4">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control">
+                        <span asp-validation-for="FirstName"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control">
+                        <span asp-validation-for="LastName"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="UserName"></label>
+                        <input asp-for="UserName" class="form-control">
+                        <span asp-validation-for="UserName"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" class="form-control">
+                        <span asp-validation-for="Email"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Mobile"></label>
+                        <input asp-for="Mobile" class="form-control">
+                        <span asp-validation-for="Mobile"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="NationalCode"></label>
+                        <input asp-for="NationalCode" class="form-control">
+                        <span asp-validation-for="NationalCode"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" class="form-control">
+                        <span asp-validation-for="Password"
+                              class="text-danger validation-message"></span>
+                    </div>
+
+                    <div class="form-check form-switch">
+
+                        <input asp-for="IsActive"
+                               class="form-check-input">
+
+                        <label asp-for="IsActive"
+                               class="form-check-label"></label>
+
+                    </div>
+
+                </div>
+
+                <div class="card-footer">
+
+                    <div class="d-flex justify-content-end gap-2">
+
+                        <a asp-action="Index"
+                           class="btn btn-outline-secondary">
+
+                            بازگشت
+
+                        </a>
+
+                        <button type="submit"
+                                class="btn btn-primary">
+
+                            افزودن کاربر
+
+                        </button>
+
+                    </div>
+
+                </div>
+
             </div>
-        </form>
+
+        </div>
+
     </div>
-</div>
 
-<div>
-    <a asp-action="Index">بازگشت به لیست</a>
-</div>
+</form>
 
-@section Scripts {
+@section Scripts
+{
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script src="~/js/plugins/image-upload-preview.js" asp-append-version="true"></script>
 }

@@ -10,7 +10,10 @@ namespace ShopStock.Infra.Data.Repositories
     {
         public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return await context.Users.ToListAsync();
+            return await context.Users
+                .Where(u => !u.IsDeleted)
+                .OrderByDescending(u => u.CreatedAt)
+                .ToListAsync();
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -18,15 +21,24 @@ namespace ShopStock.Infra.Data.Repositories
             return await context.Users.SingleOrDefaultAsync(u => u.Id == userId);
         }
 
+        public async Task<User?> GetUserWithRolesAsync(int userId)
+        {
+            return await context.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .SingleOrDefaultAsync(u => u.Id == userId);
+        }
+
         public async Task CreateAsync(User user)
         {
             await context.Users.AddAsync(user);
         }
 
-        public async Task UpdateAsync(User user)
+        public Task UpdateAsync(User user)
         {
             //user.UpdatedAt = DateTime.Now;
             context.Users.Update(user);
+            return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(User user)
