@@ -10,24 +10,21 @@ namespace ShopStock.Application.Mappers
     {
         public static User MapToUser(this RegisterDto dto)
         {
-            if (dto == null)
-                return null;
-
             return new User
             {
                 UserName = dto.UserName.FixUserName(),
                 Email = dto.Email.FixEmail(),
-                PasswordHash = dto.Password,
                 IsActive = true,
                 IsEmailActive = false,
+                EmailActiveCode = TokenGenerator.GenerateUniqueToken(),
+                ProfilePicture = "NoPhoto.jpg",
+                CreatedAt = DateTime.Now,
+                IsDeleted = false
             };
         }
 
-        public static User? MapToUser(this CreateUserDto dto)
+        public static User MapToUser(this CreateUserDto dto)
         {
-            if (dto == null)
-                return null;
-
             return new User
             {
                 FirstName = dto.FirstName,
@@ -42,6 +39,41 @@ namespace ShopStock.Application.Mappers
                 EmailActiveCode = TokenGenerator.GenerateUniqueToken(),
                 CreatedAt = DateTime.Now,
                 IsDeleted = false
+            };
+        }
+
+        public static void MapToUser(this EditUserDto dto, User user)
+        {
+            user.FirstName = dto.FirstName?.Trim();
+            user.LastName = dto.LastName?.Trim();
+            user.UserName = dto.UserName.FixUserName();
+            user.Mobile = dto.Mobile?.Trim();
+            user.NationalCode = dto.NationalCode?.Trim();
+            user.IsActive = dto.IsActive;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            if (user.Email != dto.Email.FixEmail())
+            {
+                user.Email = dto.Email.FixEmail();
+                user.IsEmailActive = false;
+                // TODO Send activation email to user email.
+            }
+        }
+
+        public static EditUserDto MapToEditDto(this User model)
+        {
+            return new EditUserDto
+            {
+                Id = model.Id,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                UserName = model.UserName,
+                Email = model.Email,
+                Mobile = model.Mobile,
+                NationalCode = model.NationalCode,
+                IsActive = model.IsActive,
+                CurrentProfilePictureName = model.ProfilePicture,
+                UserSelectedRoles = model.UserRoles?.Select(ur => ur.RoleId).ToList() ?? new List<int>()
             };
         }
     }

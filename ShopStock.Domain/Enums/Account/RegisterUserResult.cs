@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ShopStock.Domain.Enums
+﻿namespace ShopStock.Domain.Enums.Account
 {
     public enum RegisterUserResult
     {

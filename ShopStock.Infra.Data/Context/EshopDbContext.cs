@@ -20,6 +20,10 @@ namespace ShopStock.Infra.Data.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            #region Query Filters
+            modelBuilder.Entity<User>().HasQueryFilter(u => !u.IsDeleted);
+            #endregion
+
             modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
             base.OnModelCreating(modelBuilder);
 

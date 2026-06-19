@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using ShopStock.Application.Services.Interfaces;
 using ShopStock.Application.DTOs.Account;
-using ShopStock.Domain.Enums;
 using ShopStock.Web.ViewModels.Account;
+using ShopStock.Domain.Enums.Account;
 
 namespace ShopStock.Web.Controllers
 {

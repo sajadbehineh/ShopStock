@@ -6,21 +6,19 @@ namespace ShopStock.Domain.Interfaces
     {
         Task<IEnumerable<User>> GetAllUsersAsync();
         Task<User?> GetUserByIdAsync(int userId);
-        Task<User?> GetUserWithRolesAsync(int userId);
+        Task<User?> GetUserWithRolesByIdAsync(int userId);
         Task CreateAsync(User user);
         Task UpdateAsync(User user);
         Task DeleteAsync(User user);
         Task DeleteAsync(int userId);
 
-        Task AddUserToRolesAsync(int userId, IEnumerable<int> roleIds);
-
-        Task<bool> IsUserNameExistsAsync(string userName);
-        Task<bool> IsEmailExistsAsync(string email);
-        Task<bool> IsMobileExistsAsync(string mobile);
+        Task<bool> IsUserNameExistsAsync(string userName, int? excludeUserId = null);
+        Task<bool> IsEmailExistsAsync(string email, int? excludeUserId = null);
+        Task<bool> IsMobileExistsAsync(string mobile, int? excludeUserId = null);
 
         Task<User?> GetUserByActiveCodeAsync(string activeCode);
         Task<User?> GetUserByUserNameOrEmailAsync(string userNameOrEmail);
 
-        Task SaveAsync();
+        Task<bool> SaveAsync();
     }
 }

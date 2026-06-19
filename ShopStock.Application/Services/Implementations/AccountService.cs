@@ -3,9 +3,10 @@ using ShopStock.Application.Extensions;
 using ShopStock.Application.Generators;
 using ShopStock.Application.Mappers;
 using ShopStock.Application.Security;
-using ShopStock.Domain.Enums;
-using ShopStock.Domain.Interfaces;
 using ShopStock.Application.Services.Interfaces;
+using ShopStock.Domain.Interfaces;
+using ShopStock.Domain.Enums.Account;
+
 
 namespace ShopStock.Application.Services.Implementations
 {
@@ -37,12 +38,14 @@ namespace ShopStock.Application.Services.Implementations
             var user = dto.MapToUser();
 
             user.PasswordHash = dto.Password.HashPassword();
-            user.EmailActiveCode = TokenGenerator.GenerateUniqueToken();
-            user.ProfilePicture = "NoPhoto.jpg";
-            user.CreatedAt = DateTime.Now;
 
             await userRepository.CreateAsync(user);
-            await userRepository.SaveAsync();
+
+
+            var saveResult = await userRepository.SaveAsync();
+            if (!saveResult)
+                return RegisterUserResult.Failed;
+
             return RegisterUserResult.Success;
 
             #endregion
@@ -123,25 +126,35 @@ namespace ShopStock.Application.Services.Implementations
             user.IsEmailActive = true;
             user.EmailActiveCode = TokenGenerator.GenerateUniqueToken();
 
-            await userRepository.SaveAsync();
-            return true;
+            return await userRepository.SaveAsync();
         }
 
         #endregion
 
         #region Change Password
 
-        public async Task<bool> ChangePasswordAsync(ChangePasswordDto dto)
+        public async Task<ChangePasswordResult> ChangePasswordAsync(ChangePasswordDto dto)
         {
             var user = await userRepository.GetUserByIdAsync(dto.UserId);
-            if (user == null) throw new Exception("کاربر یافت نشد");
 
-            if (!PasswordHelper.VerifyPassword(dto.OldPassword, user.PasswordHash))
-                return false;
+            if (user == null)
+            {
+                // TODO UserNotFound most be loge for admin because it's a security issue. It should be implement in "ILogger".
+                //throw new Exception("کاربر یافت نشد");
+                return ChangePasswordResult.UserNotFound;
+            }
+
+            if (!PasswordHelper.VerifyPassword(dto.CurrentPassword, user.PasswordHash))
+                return ChangePasswordResult.InvalidCurrentPassword;
 
             user.PasswordHash = dto.NewPassword.HashPassword();
-            await userRepository.SaveAsync();
-            return true;
+            user.UpdatedAt = DateTime.Now;
+
+            var saveResult = await userRepository.SaveAsync();
+            if (!saveResult)
+                return ChangePasswordResult.SaveFailed;
+
+            return ChangePasswordResult.Success;
         }
 
         #endregion
@@ -180,7 +193,7 @@ namespace ShopStock.Application.Services.Implementations
             {
                 if (user.ProfilePicture != "NoPhoto.jpg")
                 {
-                    imageService.DeleteImage(user?.ProfilePicture, "ProfilePictures");
+                    imageService.DeleteImage(user.ProfilePicture, "ProfilePictures");
                     user.ProfilePicture = "NoPhoto.jpg"; // set to default image
                 }
             }
@@ -189,7 +202,7 @@ namespace ShopStock.Application.Services.Implementations
             else if (dto.ImageStream != null)
             {
                 // delete current picture if it's not the default one
-                
+
                 if (user.ProfilePicture != "NoPhoto.jpg")
                 {
                     imageService.DeleteImage(user.ProfilePicture, "ProfilePictures");
@@ -199,7 +212,11 @@ namespace ShopStock.Application.Services.Implementations
                 user.ProfilePicture = newFileName;
             }
             // 3- Save changes to database
-            await userRepository.SaveAsync();
+            var saveResult = await userRepository.SaveAsync();
+            if (!saveResult)
+            {
+                return (false, user.ProfilePicture);
+            }
             return (true, user.ProfilePicture);
         }
 
@@ -210,7 +227,6 @@ namespace ShopStock.Application.Services.Implementations
         public async Task<EditProfileDto> GetUserProfileAsync(int userId)
         {
             var user = await userRepository.GetUserByIdAsync(userId);
-            if (user == null) return null;
 
             return new EditProfileDto
             {

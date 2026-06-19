@@ -77,14 +77,14 @@ namespace ShopStock.Web.Areas.Admin.Controllers
             // Call the service to create the user
             var result = await userService.CreateUserAsync(dto);
 
-            if (result == AdminCreateUserResult.Success)
+            if (result == CreateUserResult.Success)
                 return RedirectToAction("Index");
 
             // Handle Results and add model errors accordingly
-            if (result == AdminCreateUserResult.UserNameDuplicated)
+            if (result == CreateUserResult.UserNameDuplicated)
                 ModelState.AddModelError(nameof(model.UserName), "این نام کاربری قبلاً ثبت شده است.");
 
-            if (result == AdminCreateUserResult.EmailDuplicated)
+            if (result == CreateUserResult.EmailDuplicated)
                 ModelState.AddModelError(nameof(model.Email), "این ایمیل قبلاً ثبت شده است.");
 
             model.Roles = await roleService.GetAllRolesAsync();
@@ -110,11 +110,7 @@ namespace ShopStock.Web.Areas.Admin.Controllers
             return View();
         }
 
-        // POST: Users/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
+        //[HttpPost, ValidateAntiForgeryToken]
         //public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UserName,Email,EmailActiveCode,IsEmailActive,Mobile,MobileActiveCode,NationalCode,PasswordHash,ProfilePicture,IsActive,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] User user)
         //{
         //    if (id != user.Id)
@@ -162,7 +158,14 @@ namespace ShopStock.Web.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(DeleteUserViewModel model)
         {
-            await userService.DeleteUserAsync(model.Id);
+            var result = await userService.DeleteUserAsync(model.Id);
+
+            if (!result)
+            {
+                // TODO نمایش پیغام خطا در صفحه حذف کاربر
+                ViewBag.Delete = "عملیات حذف با مشکل مواجه شد. لطفاً مجدد امتحان کنید.";
+                return View(model);
+            }
 
             return RedirectToAction(nameof(Index));
         }

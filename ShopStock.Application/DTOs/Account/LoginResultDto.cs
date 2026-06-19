@@ -1,4 +1,4 @@
-﻿using ShopStock.Domain.Enums;
+﻿using ShopStock.Domain.Enums.Account;
 
 namespace ShopStock.Application.DTOs.Account
 {

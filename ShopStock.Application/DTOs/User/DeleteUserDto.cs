@@ -7,6 +7,6 @@
         public string? LastName { get; set; }
         public string UserName { get; set; }
         public string? ProfilePicture { get; set; }
-        public List<string> Roles { get; set; } = new();
+        public List<string> UserSelectedRolesName { get; set; } = new();
     }
 }

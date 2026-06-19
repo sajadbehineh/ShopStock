@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using ShopStock.Domain.Entities.Relations;
 using ShopStock.Domain.Entities.Users;
 using ShopStock.Domain.Interfaces;
 using ShopStock.Infra.Data.Context;
@@ -21,12 +20,12 @@ namespace ShopStock.Infra.Data.Repositories
             return await context.Users.SingleOrDefaultAsync(u => u.Id == userId);
         }
 
-        public async Task<User?> GetUserWithRolesAsync(int userId)
+        public async Task<User?> GetUserWithRolesByIdAsync(int userId)
         {
             return await context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
-                .SingleOrDefaultAsync(u => u.Id == userId);
+                .SingleOrDefaultAsync(u => u.Id == userId && !u.IsDeleted);
         }
 
         public async Task CreateAsync(User user)
@@ -34,17 +33,15 @@ namespace ShopStock.Infra.Data.Repositories
             await context.Users.AddAsync(user);
         }
 
-        public Task UpdateAsync(User user)
+        public async Task UpdateAsync(User user)
         {
-            //user.UpdatedAt = DateTime.Now;
             context.Users.Update(user);
-            return Task.CompletedTask;
         }
 
         public async Task DeleteAsync(User user)
         {
             user.IsDeleted = true;
-            user.IsActive = false;
+            //user.IsActive = false;
             user.DeletedAt = DateTime.Now;
             await UpdateAsync(user);
         }
@@ -58,29 +55,31 @@ namespace ShopStock.Infra.Data.Repositories
             }
         }
 
-        public Task AddUserToRolesAsync(int userId, IEnumerable<int> roleIds)
+        public async Task<bool> IsUserNameExistsAsync(string userName, int? excludeUserId)
         {
-            foreach (int roleId in roleIds)
+            if (excludeUserId is null)
             {
-                context.UserRoles.Add(new UserRole() { UserId = userId, RoleId = roleId });
+                return await context.Users.AnyAsync(u => u.UserName == userName);
             }
-
-            return Task.CompletedTask;
+            return await context.Users.AnyAsync(u => u.Id != excludeUserId && !u.IsDeleted && u.UserName == userName);
         }
 
-        public async Task<bool> IsUserNameExistsAsync(string userName)
+        public async Task<bool> IsEmailExistsAsync(string email, int? excludeUserId)
         {
-            return await context.Users.AnyAsync(u => u.UserName == userName);
+            if (excludeUserId is null)
+            {
+                return await context.Users.AnyAsync(u => u.Email == email);
+            }
+            return await context.Users.AnyAsync(u => u.Id == excludeUserId && !u.IsDeleted && u.Email == email);
         }
 
-        public async Task<bool> IsEmailExistsAsync(string email)
+        public async Task<bool> IsMobileExistsAsync(string mobile, int? excludeUserId)
         {
-            return await context.Users.AnyAsync(u => u.Email == email);
-        }
-
-        public async Task<bool> IsMobileExistsAsync(string mobile)
-        {
-            return await context.Users.AnyAsync(u => u.Mobile == mobile);
+            if (excludeUserId is null)
+            {
+                return await context.Users.AnyAsync(u => u.Mobile == mobile);
+            }
+            return await context.Users.AnyAsync(u => u.Id == excludeUserId && !u.IsDeleted && u.Mobile == mobile);
         }
 
         public async Task<User?> GetUserByActiveCodeAsync(string activeCode)
@@ -98,9 +97,9 @@ namespace ShopStock.Infra.Data.Repositories
                 .FirstOrDefaultAsync(u => u.UserName == userNameOrEmail || u.Email == userNameOrEmail);
         }
 
-        public async Task SaveAsync()
+        public async Task<bool> SaveAsync()
         {
-            await context.SaveChangesAsync();
+            return await context.SaveChangesAsync() > 0;
         }
     }
 }

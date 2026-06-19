@@ -1,9 +1,9 @@
 ﻿namespace ShopStock.Domain.Enums.User
 {
-    public enum AdminCreateUserResult
+    public enum CreateUserResult
     {
         Success,
-        Error,
+        SaveFailed,
         EmailDuplicated,
         UserNameDuplicated,
         MobileDuplicated,

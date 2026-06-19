@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ShopStock.Application.Services.Interfaces;
 using ShopStock.Application.DTOs.Account;
+using ShopStock.Domain.Enums.Account;
 using ShopStock.Web.Areas.UserPanel.ViewModels;
 using ShopStock.Web.Extensions;
 
@@ -97,19 +98,36 @@ namespace ShopStock.Web.Areas.UserPanel.Controllers
             var dto = new ChangePasswordDto()
             {
                 UserId = User.GetUserId(),
-                OldPassword = model.OldPassword,
+                CurrentPassword = model.CurrentPassword,
                 NewPassword = model.Password
             };
 
-            bool result = await _accountService.ChangePasswordAsync(dto);
+            var result = await _accountService.ChangePasswordAsync(dto);
 
-            if (!result)
+            if (result == ChangePasswordResult.Success)
             {
-                ModelState.AddModelError("OldPassword", "رمز عبور فعلی صحیح نمی باشد.");
-                return View(model);
+                return RedirectToAction("Logout", "Account");
             }
 
-            return RedirectToAction("Logout", "Account");
+            switch (result)
+            {
+                case ChangePasswordResult.InvalidCurrentPassword:
+                    ModelState.AddModelError(nameof(model.CurrentPassword), "رمز عبور فعلی صحیح نمی باشد.");
+                    break;
+
+                case ChangePasswordResult.UserNotFound:
+                    ModelState.AddModelError(string.Empty, "کاربر مورد نظر یافت نشد.");
+                    break;
+
+                case ChangePasswordResult.SaveFailed:
+                    ModelState.AddModelError(string.Empty, "خطایی در ذخیره تغییرات رخ داد. لطفاً دوباره تلاش کنید.");
+                    break;
+
+                default:
+                    ModelState.AddModelError(string.Empty, "خطای نامشخصی رخ داد.");
+                    break;
+            }
+            return View(model);
         }
 
         #endregion
