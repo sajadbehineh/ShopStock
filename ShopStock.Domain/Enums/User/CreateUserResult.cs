@@ -4,6 +4,7 @@
     {
         Success,
         SaveFailed,
+        RoleSaveFailed,
         EmailDuplicated,
         UserNameDuplicated,
         MobileDuplicated,

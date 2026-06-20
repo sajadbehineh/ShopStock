@@ -8,7 +8,11 @@ using ShopStock.Application.Services.Interfaces;
 
 namespace ShopStock.Application.Services.Implementations
 {
-    public class UserService(IUserRepository userRepository, IRoleRepository roleRepository, IImageService imageService) : IUserService
+    public class UserService(
+        IUserRepository userRepository,
+        IRoleRepository roleRepository,
+        IImageService imageService,
+        IUnitOfWork unitOfWork) : IUserService
     {
         #region Get Users
 
@@ -72,11 +76,15 @@ namespace ShopStock.Application.Services.Implementations
 
         public async Task<CreateUserResult> CreateUserAsync(CreateUserDto dto)
         {
-            // normalize the email and username
+            // Normalization
             dto.Email = dto.Email.FixEmail();
             dto.UserName = dto.UserName.FixUserName();
 
+            if (!string.IsNullOrWhiteSpace(dto.Mobile))
+                dto.Mobile = dto.Mobile.FixMobile();
+
             #region Validations
+
             if (string.IsNullOrWhiteSpace(dto.Email) ||
                 string.IsNullOrWhiteSpace(dto.UserName) ||
                 string.IsNullOrWhiteSpace(dto.Password))
@@ -85,93 +93,67 @@ namespace ShopStock.Application.Services.Implementations
             }
 
             if (await userRepository.IsEmailExistsAsync(dto.Email))
-            {
                 return CreateUserResult.EmailDuplicated;
-            }
 
-            if (!string.IsNullOrWhiteSpace(dto.UserName) && await userRepository.IsUserNameExistsAsync(dto.UserName.FixUserName()))
-            {
+            if (await userRepository.IsUserNameExistsAsync(dto.UserName))
                 return CreateUserResult.UserNameDuplicated;
-            }
 
-            if (!string.IsNullOrWhiteSpace(dto.Mobile) && await userRepository.IsMobileExistsAsync(dto.Mobile.FixMobile()))
+            if (!string.IsNullOrWhiteSpace(dto.Mobile) &&
+                await userRepository.IsMobileExistsAsync(dto.Mobile))
             {
                 return CreateUserResult.MobileDuplicated;
             }
+
+            if (dto.UserSelectedRoles is null || !dto.UserSelectedRoles.Any())
+                return CreateUserResult.InvalidData;
+
             #endregion
 
             dto.ProfilePictureName = await SaveImageFileAsync(dto.ImageStream);
 
             var user = dto.MapToUser();
-
             user.PasswordHash = dto.Password.HashPassword();
 
-            // کدهای فعلی
-            await userRepository.CreateAsync(user);
-            var saveUserResult = await userRepository.SaveAsync();
-            if (!saveUserResult)
+            await using var transaction = await unitOfWork.BeginTransactionAsync();
+
+            try
             {
-                if (!string.IsNullOrWhiteSpace(dto.ProfilePictureName) &&
-                    dto.ProfilePictureName != "NoPhoto.jpg")
+                await userRepository.CreateAsync(user);
+
+                var userSaved = await userRepository.SaveAsync();
+
+                if (!userSaved)
                 {
-                    imageService.DeleteImage(dto.ProfilePictureName, "ProfilePictures");
+                    await transaction.RollbackAsync();
+                    DeleteProfileImageIfExists(dto.ProfilePictureName);
+                    return CreateUserResult.SaveFailed;
                 }
+
+                await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles);
+
+                var rolesSaved = await roleRepository.SaveAsync();
+
+                if (!rolesSaved)
+                {
+                    await transaction.RollbackAsync();
+                    DeleteProfileImageIfExists(dto.ProfilePictureName);
+                    return CreateUserResult.RoleSaveFailed;
+                }
+
+                await transaction.CommitAsync();
+
+                return CreateUserResult.Success;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+
+                DeleteProfileImageIfExists(dto.ProfilePictureName);
 
                 return CreateUserResult.SaveFailed;
             }
-
-            if (dto.UserSelectedRoles is not null && dto.UserSelectedRoles.Any())
-            {
-                await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles ?? new List<int>());
-                // TODO Check
-                await roleRepository.SaveAsync();
-                return CreateUserResult.Success;
-            }
-            // TODO کابر باید حداقل یک نقش داشته باشد. پس میتوان شرط بالا را معکوس کرد و کدهای ذخیره را بیرون آورد
-            return CreateUserResult.InvalidData;
-
-
-            // کدهایی که میخوام جایگزین کدهای فعلی بشه
-
-            // شروع تراکنش
-            //await using var transaction = await userRepository.Context.Database.BeginTransactionAsync();
-            //try
-            //{
-            // ایجاد کاربر
-            //    await userRepository.CreateAsync(user);
-            //    var userSaved = await userRepository.SaveAsync();
-            //    if (!userSaved)
-            //        throw new Exception("UserSaveFailed");
-
-            // افزودن نقش‌ها
-            //    await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles);
-            //    var rolesSaved = await roleRepository.SaveAsync();
-            //    if (!rolesSaved)
-            //        throw new Exception("RoleSaveFailed");
-
-            // همه‌چیز اوکی، کامیت تراکنش
-            //    await transaction.CommitAsync();
-            //    return CreateUserResult.Success;
-            //}
-            //catch (Exception ex)
-            //{
-            // برگرداندن تراکنش
-            //    await transaction.RollbackAsync();
-
-            // حذف تصویر در صورت نیاز
-            //    if (!string.IsNullOrWhiteSpace(dto.ProfilePictureName)
-            //        && dto.ProfilePictureName != "NoPhoto.jpg")
-            //    {
-            //        imageService.DeleteImage(dto.ProfilePictureName, "ProfilePictures");
-            //    }
-
-            // تعیین نوع خطا
-            //    if (ex.Message == "RoleSaveFailed")
-            //        return CreateUserResult.RoleSaveFailed;
-
-            //    return CreateUserResult.SaveFailed;
-            //}
         }
+
 
         #endregion
 
@@ -288,6 +270,15 @@ namespace ShopStock.Application.Services.Implementations
             var fileName = await imageService.SaveImageAsync(imageStream, "ProfilePictures", 250, 250);
 
             return fileName;
+        }
+
+        private void DeleteProfileImageIfExists(string? imageName)
+        {
+            if (!string.IsNullOrWhiteSpace(imageName) &&
+                imageName != "NoPhoto.jpg")
+            {
+                imageService.DeleteImage(imageName, "ProfilePictures");
+            }
         }
     }
 }
