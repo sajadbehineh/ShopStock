@@ -8,6 +8,5 @@ namespace ShopStock.Domain.Interfaces
         Task AddUserToRolesAsync(int userId, IEnumerable<int> roleIds);
         Task UpdateUserRolesAsync(int userId, IEnumerable<int> selectedRolesId);
         Task DeleteUserRolesAsync(int userId);
-        Task<bool> SaveAsync();
     }
 }

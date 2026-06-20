@@ -18,7 +18,5 @@ namespace ShopStock.Domain.Interfaces
 
         Task<User?> GetUserByActiveCodeAsync(string activeCode);
         Task<User?> GetUserByUserNameOrEmailAsync(string userNameOrEmail);
-
-        Task<bool> SaveAsync();
     }
 }

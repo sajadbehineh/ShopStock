@@ -45,10 +45,5 @@ namespace ShopStock.Infra.Data.Repositories
 
             context.UserRoles.RemoveRange(currentRoles);
         }
-
-        public async Task<bool> SaveAsync()
-        {
-            return await context.SaveChangesAsync() > 0;
-        }
     }
 }

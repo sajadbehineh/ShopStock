@@ -96,10 +96,5 @@ namespace ShopStock.Infra.Data.Repositories
             return await context.Users
                 .FirstOrDefaultAsync(u => u.UserName == userNameOrEmail || u.Email == userNameOrEmail);
         }
-
-        public async Task<bool> SaveAsync()
-        {
-            return await context.SaveChangesAsync() > 0;
-        }
     }
 }

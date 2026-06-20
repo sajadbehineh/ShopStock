@@ -114,46 +114,29 @@ namespace ShopStock.Application.Services.Implementations
             var user = dto.MapToUser();
             user.PasswordHash = dto.Password.HashPassword();
 
-            await using var transaction = await unitOfWork.BeginTransactionAsync();
+            #region Start Transaction
+            await unitOfWork.BeginTransactionAsync();
 
             try
             {
                 await userRepository.CreateAsync(user);
 
-                var userSaved = await userRepository.SaveAsync();
-
-                if (!userSaved)
-                {
-                    await transaction.RollbackAsync();
-                    DeleteProfileImageIfExists(dto.ProfilePictureName);
-                    return CreateUserResult.SaveFailed;
-                }
-
                 await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles);
 
-                var rolesSaved = await roleRepository.SaveAsync();
-
-                if (!rolesSaved)
-                {
-                    await transaction.RollbackAsync();
-                    DeleteProfileImageIfExists(dto.ProfilePictureName);
-                    return CreateUserResult.RoleSaveFailed;
-                }
-
-                await transaction.CommitAsync();
+                await unitOfWork.CommitAsync();
 
                 return CreateUserResult.Success;
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await unitOfWork.RollbackAsync();
 
                 DeleteProfileImageIfExists(dto.ProfilePictureName);
 
                 return CreateUserResult.SaveFailed;
             }
+            #endregion
         }
-
 
         #endregion
 
@@ -208,11 +191,28 @@ namespace ShopStock.Application.Services.Implementations
 
             dto.MapToUser(user);
 
-            await userRepository.UpdateAsync(user);
+            // Start Transaction
+            await unitOfWork.BeginTransactionAsync();
 
-            var saveResult = await userRepository.SaveAsync();
-            if (!saveResult)
+            try
             {
+                await userRepository.UpdateAsync(user);
+
+                await roleRepository.UpdateUserRolesAsync(user.Id, dto.UserSelectedRoles);
+
+                await unitOfWork.CommitAsync();
+
+                if (currentPictureShouldBeDeleted && currentProfilePicture is not null && currentProfilePicture is not "NoPhoto.jpg")
+                {
+                    imageService.DeleteImage(currentProfilePicture, "ProfilePictures");
+                }
+
+                return EditUserResult.Success;
+            }
+            catch
+            {
+                await unitOfWork.RollbackAsync();
+
                 if (!string.IsNullOrWhiteSpace(newProfilePicture) && newProfilePicture is not "NoPhoto.jpg")
                 {
                     imageService.DeleteImage(newProfilePicture, "ProfilePictures");
@@ -220,15 +220,6 @@ namespace ShopStock.Application.Services.Implementations
 
                 return EditUserResult.EditFailed;
             }
-
-            if (currentPictureShouldBeDeleted && currentProfilePicture is not null && currentProfilePicture is not "NoPhoto.jpg")
-            {
-                imageService.DeleteImage(currentProfilePicture, "ProfilePictures");
-            }
-
-            await roleRepository.UpdateUserRolesAsync(user.Id, dto.UserSelectedRoles);
-            await roleRepository.SaveAsync();
-            return EditUserResult.Success;
         }
 
         #endregion
@@ -242,12 +233,9 @@ namespace ShopStock.Application.Services.Implementations
                 return false;
 
             await userRepository.DeleteAsync(user);
-            var deleteResult = await userRepository.SaveAsync();
-            if (!deleteResult)
-            {
-                return false;
-            }
-            return true;
+            var deleteResult = await unitOfWork.SaveChangesAsync();
+
+            return deleteResult > 0;
         }
 
         #endregion
@@ -262,7 +250,7 @@ namespace ShopStock.Application.Services.Implementations
         {
             // اگر کاربر هیچ تصویری انتخاب نکرده باشد
             // تصویر پیش‌فرض سیستم ثبت می‌شود
-            if (imageStream == null)
+            if (imageStream is null)
                 return "NoPhoto.jpg";
 
             // ذخیره تصویر در پوشه مشخص
