@@ -44,6 +44,7 @@ namespace ShopStock.Web.Mappers
                 Mobile = dto.Mobile,
                 NationalCode = dto.NationalCode,
                 IsActive = dto.IsActive,
+                CurrentProfilePictureName = dto.CurrentProfilePictureName,
                 RemoveProfilePicture = dto.RemoveCurrentPicture,
                 UserSelectedRoles = dto.UserSelectedRoles ?? new List<int>()
             };
@@ -62,9 +63,9 @@ namespace ShopStock.Web.Mappers
                 NationalCode = model.NationalCode,
                 Password = model.Password,
                 IsActive = model.IsActive,
+                RemoveCurrentPicture = model.RemoveProfilePicture,
                 UserSelectedRoles = model.UserSelectedRoles ?? new List<int>(),
                 CurrentProfilePictureName = model.CurrentProfilePictureName,
-                RemoveCurrentPicture = model.RemoveProfilePicture,
                 ImageStream = model.ProfilePictureFile?.OpenReadStream(),
                 ProfilePictureName = model.ProfilePictureFile?.FileName
             };

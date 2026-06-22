@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ShopStock.Application.DTOs.User;
+using ShopStock.Application.Services.Implementations;
 using ShopStock.Application.Services.Interfaces;
 using ShopStock.Domain.Enums.User;
 using ShopStock.Web.Areas.Admin.ViewModels.User;
@@ -53,8 +54,8 @@ namespace ShopStock.Web.Areas.Admin.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            //if (!ModelState.IsValid)
+            //    return View(model);
 
             // Create a DTO to send to the service layer
             var dto = new CreateUserDto
@@ -71,21 +72,61 @@ namespace ShopStock.Web.Areas.Admin.Controllers
                 ProfilePictureName = model.ProfilePictureName,
                 ImageStream = model.ProfilePictureFile?.OpenReadStream(),
 
-                UserSelectedRoles = model.UserSelectedRoles
+                UserSelectedRoles = model.UserSelectedRoles ?? new List<int>()
             };
 
             // Call the service to create the user
             var result = await userService.CreateUserAsync(dto);
 
-            if (result == CreateUserResult.Success)
-                return RedirectToAction("Index");
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "اطلاعات کاربر جدید با موفقیت ثبت شد.";
+                return RedirectToAction(nameof(Index));
+            }
 
             // Handle Results and add model errors accordingly
-            if (result == CreateUserResult.UserNameDuplicated)
-                ModelState.AddModelError(nameof(model.UserName), "این نام کاربری قبلاً ثبت شده است.");
+            foreach (var error in result.Errors)
+            {
+                switch (error)
+                {
+                    case CreateUserResult.UserNameDuplicated:
+                        ModelState.AddModelError(nameof(model.UserName), "این نام کاربری قبلاً ثبت شده است.");
+                        break;
 
-            if (result == CreateUserResult.EmailDuplicated)
-                ModelState.AddModelError(nameof(model.Email), "این ایمیل قبلاً ثبت شده است.");
+                    case CreateUserResult.EmailDuplicated:
+                        ModelState.AddModelError(nameof(model.Email), "این ایمیل قبلاً ثبت شده است.");
+                        break;
+
+                    case CreateUserResult.MobileDuplicated:
+                        ModelState.AddModelError(nameof(model.Mobile), "این شماره موبایل قبلاً ثبت شده است.");
+                        break;
+
+                    case CreateUserResult.InvalidImage:
+                        ModelState.AddModelError(nameof(model.ProfilePictureFile), "*فایل انتخاب شده یک تصویر نامعتبر است.");
+                        break;
+
+                    case CreateUserResult.EmailRequired:
+                        ModelState.AddModelError(nameof(model.Email), "ایمیل الزامی است");
+                        break;
+
+                    case CreateUserResult.UserNameRequired:
+                        ModelState.AddModelError(nameof(model.UserName), "نام کاربری الزامی است");
+                        break;
+
+                    case CreateUserResult.PasswordRequired:
+                        ModelState.AddModelError(nameof(model.Password), "کلمه عبور الزامی است");
+                        break;
+
+                    case CreateUserResult.RoleRequired:
+                        TempData["RoleRequiredMessage"] = "انتخاب حداقل یک نقش برای کاربر الزامیست.";
+                        break;
+
+                    case CreateUserResult.SaveFailed:
+                        //ModelState.AddModelError(string.Empty, "ثبت کاربر جدید با خطا مواجه شد.");
+                        TempData["FailedMessage"] = "ثبت کاربر جدید با خطا مواجه شد.";
+                        break;
+                }
+            }
 
             model.Roles = await roleService.GetAllRolesAsync();
 
@@ -93,53 +134,96 @@ namespace ShopStock.Web.Areas.Admin.Controllers
         }
         #endregion
 
+        #region Edit User
 
-        // GET: Users/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id == null)
+            if (id <= 0)
             {
                 return NotFound();
             }
 
-            //var user = await _context.Users.FindAsync(id);
-            //if (user == null)
-            //{
-            //    return NotFound();
-            //}
-            return View();
+            var userDto = await userService.GetUserForEditAsync(id);
+            if (userDto == null)
+            {
+                return NotFound();
+            }
+
+            var model = userDto.ToEditViewModel();
+            model.Roles = await roleService.GetAllRolesAsync();
+
+            return View(model);
         }
 
-        //[HttpPost, ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, [Bind("FirstName,LastName,UserName,Email,EmailActiveCode,IsEmailActive,Mobile,MobileActiveCode,NationalCode,PasswordHash,ProfilePicture,IsActive,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] User user)
-        //{
-        //    if (id != user.Id)
-        //    {
-        //        return NotFound();
-        //    }
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(EditUserViewModel model, bool deleteCurrentPicture)
+        {
+            if (!ModelState.IsValid)
+            {
+                model.Roles = await roleService.GetAllRolesAsync();
+                return View(model);
+            }
 
-        //    //if (ModelState.IsValid)
-        //    //{
-        //    //    try
-        //    //    {
-        //    //        _context.Update(user);
-        //    //        await _context.SaveChangesAsync();
-        //    //    }
-        //    //    catch (DbUpdateConcurrencyException)
-        //    //    {
-        //    //        if (!UserExists(user.Id))
-        //    //        {
-        //    //            return NotFound();
-        //    //        }
-        //    //        else
-        //    //        {
-        //    //            throw;
-        //    //        }
-        //    //    }
-        //    //    return RedirectToAction(nameof(Index));
-        //    //}
-        //    return View(user);
-        //}
+            var dto = model.MapToEditDto();
+            dto.RemoveCurrentPicture = deleteCurrentPicture;
+            var result = await userService.EditUserAsync(dto);
+
+            if (result.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "اطلاعات کاربر با موفقیت ویرایش شد.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (result.Errors.Contains(EditUserResult.UserNotFound))
+            {
+                TempData["ErrorMessage"] = "کاربر مورد نظر یافت نشد.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var error in result.Errors)
+            {
+                switch (error)
+                {
+                    case EditUserResult.UserNameDuplicated:
+                        ModelState.AddModelError(nameof(model.UserName), "این نام کاربری قبلاً ثبت شده است.");
+                        break;
+
+                    case EditUserResult.EmailDuplicated:
+                        ModelState.AddModelError(nameof(model.Email), "این ایمیل قبلاً ثبت شده است.");
+                        break;
+
+                    case EditUserResult.MobileDuplicated:
+                        ModelState.AddModelError(nameof(model.Mobile), "این شماره موبایل قبلاً ثبت شده است.");
+                        break;
+
+                    case EditUserResult.InvalidImage:
+                        ModelState.AddModelError(nameof(model.ProfilePictureFile), "*فایل انتخاب شده یک تصویر نامعتبر است.");
+                        break;
+
+                    case EditUserResult.EmailRequired:
+                        ModelState.AddModelError(nameof(model.Email), "ایمیل الزامی است");
+                        break;
+
+                    case EditUserResult.UserNameRequired:
+                        ModelState.AddModelError(nameof(model.UserName), "نام کاربری الزامی است");
+                        break;
+
+                    case EditUserResult.RoleRequired:
+                        TempData["RoleRequiredMessage"] = "انتخاب حداقل یک نقش برای کاربر الزامیست.";
+                        break;
+
+                    case EditUserResult.EditFailed:
+                        //ModelState.AddModelError(string.Empty, "ویرایش کاربر با خطا مواجه شد.");
+                        TempData["FailedMessage"] = "ویرایش کاربر با خطا مواجه شد.";
+                        break;
+                }
+            }
+            model.Roles = await roleService.GetAllRolesAsync();
+            return View(model);
+        }
+
+        #endregion
 
         #region Delete User
         public async Task<IActionResult> Delete(int id)

@@ -4,13 +4,6 @@
     top: 90px;
 }
 
-/*.validation-message
-{
-    display: block;
-    min-height: 5px;
-    font-size: .875rem;
-}*/
-
 .profile-preview
 {
     width: 180px;
@@ -22,4 +15,17 @@
 {
     max-height: 350px;
     overflow-y: auto;
+}
+
+html
+{
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+}
+
+.validation-message
+{
+    display: block;
+    min-height: 5px;
+    font-size: .875rem;
 }

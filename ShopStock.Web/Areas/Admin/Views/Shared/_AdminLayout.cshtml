@@ -75,6 +75,100 @@
 
     <!-- Page JS -->
     <script src="/admin-assets/assets/js/dashboards-analytics.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+        const menuRoot = document.querySelector("#layout-menu, .layout-menu");
+
+        if (!menuRoot) {
+        return;
+        }
+
+        function normalizePath(path) {
+        if (!path) return "/";
+
+        path = path.toLowerCase();
+
+        // حذف query string و hash
+        path = path.split("?")[0].split("#")[0];
+
+        // حذف اسلش آخر
+        if (path.length > 1 && path.endsWith("/")) {
+        path = path.slice(0, -1);
+        }
+
+        // یکی دانستن /index با مسیر اصلی
+        if (path.endsWith("/index")) {
+        path = path.slice(0, -6);
+        }
+
+        return path;
+        }
+
+        const currentPath = normalizePath(window.location.pathname);
+
+        // اول همه active/open های قبلی را پاک کن
+        menuRoot.querySelectorAll(".menu-item.active").forEach(function (item) {
+        item.classList.remove("active");
+        });
+
+        menuRoot.querySelectorAll(".menu-item.open").forEach(function (item) {
+        item.classList.remove("open");
+        });
+
+        let matchedLink = null;
+        let bestMatchLength = 0;
+
+        // فقط لینک‌های واقعی، نه menu-toggle ها
+        const links = menuRoot.querySelectorAll("a.menu-link[href]:not(.menu-toggle)");
+
+        links.forEach(function (link) {
+        const href = link.getAttribute("href");
+
+        if (!href || href === "#" || href.startsWith("javascript:")) {
+        return;
+        }
+
+        const linkUrl = new URL(link.href, window.location.origin);
+        const linkPath = normalizePath(linkUrl.pathname);
+
+        // match دقیق
+        if (currentPath === linkPath) {
+        if (linkPath.length > bestMatchLength) {
+        matchedLink = link;
+        bestMatchLength = linkPath.length;
+        }
+        }
+        });
+
+        if (!matchedLink) {
+        return;
+        }
+
+        const currentItem = matchedLink.closest(".menu-item");
+
+        if (currentItem) {
+        currentItem.classList.add("active");
+        }
+
+        // باز نگه داشتن والدها
+        let parentSub = matchedLink.closest(".menu-sub");
+
+        while (parentSub) {
+        const parentItem = parentSub.closest(".menu-item");
+
+        if (parentItem) {
+        parentItem.classList.add("open");
+        parentItem.classList.add("active");
+        }
+
+        parentSub = parentItem?.parentElement?.closest(".menu-sub");
+        }
+        });
+    </script>
+
+
     @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -38,6 +38,7 @@ public class EditUserViewModel
     [Display(Name = "رمز عبور جدید")]
     [DataType(DataType.Password)]
     [MinLength(6, ErrorMessage = "{0} باید حداقل {1} کاراکتر باشد.")]
+    //[RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", ErrorMessage = "کلمه عبور باید حداقل 8 کاراکتر و شامل حروف بزرگ، کوچک، اعداد و کاراکترهای خاص باشد.")]
     public string? Password { get; set; }
 
     [DisplayName("کاربر فعال است ؟")]

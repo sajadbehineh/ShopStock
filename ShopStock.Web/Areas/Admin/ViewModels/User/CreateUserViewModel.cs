@@ -30,6 +30,7 @@ public class CreateUserViewModel
 
     [DisplayName("رمز عبور")]
     [Required(ErrorMessage = "لطفاً {0} را وارد کنید")]
+    //[RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$", ErrorMessage = "کلمه عبور باید حداقل 8 کاراکتر و شامل حروف بزرگ، کوچک، اعداد و کاراکترهای خاص باشد.")]
     public string Password { get; set; }
 
     //[DisplayName("تصویر پروفایل")]

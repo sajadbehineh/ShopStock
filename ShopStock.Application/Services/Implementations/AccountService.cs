@@ -10,7 +10,10 @@ using ShopStock.Domain.Enums.Account;
 
 namespace ShopStock.Application.Services.Implementations
 {
-    public class AccountService(IUserRepository userRepository, IImageService imageService) : IAccountService
+    public class AccountService(
+        IUserRepository userRepository,
+        IImageService imageService,
+        IUnitOfWork unitOfWork) : IAccountService
     {
         #region Register User
 
@@ -41,9 +44,8 @@ namespace ShopStock.Application.Services.Implementations
 
             await userRepository.CreateAsync(user);
 
-
-            var saveResult = await userRepository.SaveAsync();
-            if (!saveResult)
+            var saveResult = await unitOfWork.SaveChangesAsync();
+            if (saveResult <= 0)
                 return RegisterUserResult.Failed;
 
             return RegisterUserResult.Success;
@@ -126,7 +128,7 @@ namespace ShopStock.Application.Services.Implementations
             user.IsEmailActive = true;
             user.EmailActiveCode = TokenGenerator.GenerateUniqueToken();
 
-            return await userRepository.SaveAsync();
+            return await unitOfWork.SaveChangesAsync() > 0;
         }
 
         #endregion
@@ -150,8 +152,8 @@ namespace ShopStock.Application.Services.Implementations
             user.PasswordHash = dto.NewPassword.HashPassword();
             user.UpdatedAt = DateTime.Now;
 
-            var saveResult = await userRepository.SaveAsync();
-            if (!saveResult)
+            var saveResult = await unitOfWork.SaveChangesAsync();
+            if (saveResult <= 0)
                 return ChangePasswordResult.SaveFailed;
 
             return ChangePasswordResult.Success;
@@ -211,9 +213,10 @@ namespace ShopStock.Application.Services.Implementations
                 var newFileName = await imageService.SaveImageAsync(dto.ImageStream, "ProfilePictures", 250, 250);
                 user.ProfilePicture = newFileName;
             }
+
             // 3- Save changes to database
-            var saveResult = await userRepository.SaveAsync();
-            if (!saveResult)
+            var saveResult = await unitOfWork.SaveChangesAsync();
+            if (saveResult <= 0)
             {
                 return (false, user.ProfilePicture);
             }

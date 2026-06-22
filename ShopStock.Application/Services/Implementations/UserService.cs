@@ -5,6 +5,7 @@ using ShopStock.Application.Security;
 using ShopStock.Domain.Enums.User;
 using ShopStock.Domain.Interfaces;
 using ShopStock.Application.Services.Interfaces;
+using ShopStock.Domain.Results;
 
 namespace ShopStock.Application.Services.Implementations
 {
@@ -74,8 +75,10 @@ namespace ShopStock.Application.Services.Implementations
 
         #region Create User
 
-        public async Task<CreateUserResult> CreateUserAsync(CreateUserDto dto)
+        public async Task<ServiceResult<CreateUserResult>> CreateUserAsync(CreateUserDto dto)
         {
+            var errors = new List<CreateUserResult>();
+
             // Normalization
             dto.Email = dto.Email.FixEmail();
             dto.UserName = dto.UserName.FixUserName();
@@ -85,31 +88,52 @@ namespace ShopStock.Application.Services.Implementations
 
             #region Validations
 
-            if (string.IsNullOrWhiteSpace(dto.Email) ||
-                string.IsNullOrWhiteSpace(dto.UserName) ||
-                string.IsNullOrWhiteSpace(dto.Password))
+            if (string.IsNullOrWhiteSpace(dto.Email))
             {
-                return CreateUserResult.InvalidData;
+                errors.Add(CreateUserResult.EmailRequired);
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.UserName))
+            {
+                errors.Add(CreateUserResult.UserNameRequired);
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+            {
+                errors.Add(CreateUserResult.PasswordRequired);
             }
 
             if (await userRepository.IsEmailExistsAsync(dto.Email))
-                return CreateUserResult.EmailDuplicated;
+                errors.Add(CreateUserResult.EmailDuplicated);
 
             if (await userRepository.IsUserNameExistsAsync(dto.UserName))
-                return CreateUserResult.UserNameDuplicated;
+                errors.Add(CreateUserResult.UserNameDuplicated);
 
             if (!string.IsNullOrWhiteSpace(dto.Mobile) &&
                 await userRepository.IsMobileExistsAsync(dto.Mobile))
             {
-                return CreateUserResult.MobileDuplicated;
+                errors.Add(CreateUserResult.MobileDuplicated);
             }
 
-            if (dto.UserSelectedRoles is null || !dto.UserSelectedRoles.Any())
-                return CreateUserResult.InvalidData;
+            if (!dto.UserSelectedRoles.Any())
+                errors.Add(CreateUserResult.RoleRequired);
 
             #endregion
 
-            dto.ProfilePictureName = await SaveImageFileAsync(dto.ImageStream);
+            if (dto.ImageStream != null)
+            {
+                try
+                {
+                    dto.ProfilePictureName = await SaveImageFileAsync(dto.ImageStream);
+                }
+                catch (InvalidDataException)
+                {
+                    errors.Add(CreateUserResult.InvalidImage);
+                }
+            }
+
+            if (errors.Any())
+                return ServiceResult<CreateUserResult>.Failure(errors.ToArray());
 
             var user = dto.MapToUser();
             user.PasswordHash = dto.Password.HashPassword();
@@ -120,12 +144,14 @@ namespace ShopStock.Application.Services.Implementations
             try
             {
                 await userRepository.CreateAsync(user);
+                await unitOfWork.SaveChangesAsync();
 
-                await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles);
+                await roleRepository.AddUserToRolesAsync(user.Id, dto.UserSelectedRoles!);
 
                 await unitOfWork.CommitAsync();
 
-                return CreateUserResult.Success;
+                return ServiceResult<CreateUserResult>.Success();
+
             }
             catch
             {
@@ -133,7 +159,7 @@ namespace ShopStock.Application.Services.Implementations
 
                 DeleteProfileImageIfExists(dto.ProfilePictureName);
 
-                return CreateUserResult.SaveFailed;
+                return ServiceResult<CreateUserResult>.Failure(CreateUserResult.SaveFailed);
             }
             #endregion
         }
@@ -142,28 +168,44 @@ namespace ShopStock.Application.Services.Implementations
 
         #region Edit User
 
-        public async Task<EditUserResult> EditUserAsync(EditUserDto dto)
+        public async Task<ServiceResult<EditUserResult>> EditUserAsync(EditUserDto dto)
         {
             var user = await userRepository.GetUserWithRolesByIdAsync(dto.Id);
+            var errors = new List<EditUserResult>();
+
             if (user is null)
-                return EditUserResult.UserNotFound;
+                errors.Add(EditUserResult.UserNotFound);
 
             dto.UserName = dto.UserName.FixUserName();
             dto.Email = dto.Email.FixEmail();
 
+            if (string.IsNullOrWhiteSpace(dto.Email))
+            {
+                errors.Add(EditUserResult.EmailRequired);
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.UserName))
+            {
+                errors.Add(EditUserResult.UserNameRequired);
+            }
+
+
             if (await userRepository.IsUserNameExistsAsync(dto.UserName, dto.Id))
-                return EditUserResult.DuplicateUserName;
+                errors.Add(EditUserResult.UserNameDuplicated);
 
             if (await userRepository.IsEmailExistsAsync(dto.Email, dto.Id))
-                return EditUserResult.DuplicateEmail;
+                errors.Add(EditUserResult.EmailDuplicated);
 
             if (!string.IsNullOrWhiteSpace(dto.Mobile) &&
                 await userRepository.IsMobileExistsAsync(dto.Mobile, dto.Id))
             {
-                return EditUserResult.DuplicateMobile;
+                errors.Add(EditUserResult.MobileDuplicated);
             }
 
-            var currentProfilePicture = user.ProfilePicture;
+            if (!dto.UserSelectedRoles.Any())
+                errors.Add(EditUserResult.RoleRequired);
+
+            var currentProfilePicture = user!.ProfilePicture;
             string? newProfilePicture = null;
             bool currentPictureShouldBeDeleted = false;
 
@@ -180,18 +222,26 @@ namespace ShopStock.Application.Services.Implementations
             }
             else if (dto.ImageStream is not null)
             {
-                newProfilePicture = await imageService.SaveImageAsync(dto.ImageStream, "ProfilePictures", 250, 250);
-                user.ProfilePicture = newProfilePicture;
-
-                if (currentProfilePicture is not null && currentProfilePicture is not "NoPhoto.jpg")
+                try
                 {
-                    currentPictureShouldBeDeleted = true;
+                    newProfilePicture = await SaveImageFileAsync(dto.ImageStream);
+                    user.ProfilePicture = newProfilePicture;
+
+                    if (currentProfilePicture is not null && currentProfilePicture is not "NoPhoto.jpg")
+                        currentPictureShouldBeDeleted = true;
+                }
+                catch (InvalidDataException)
+                {
+                    errors.Add(EditUserResult.InvalidImage);
                 }
             }
 
+            if (errors.Any())
+                return ServiceResult<EditUserResult>.Failure(errors.ToArray());
+
             dto.MapToUser(user);
 
-            // Start Transaction
+            #region Start Transaction
             await unitOfWork.BeginTransactionAsync();
 
             try
@@ -207,7 +257,7 @@ namespace ShopStock.Application.Services.Implementations
                     imageService.DeleteImage(currentProfilePicture, "ProfilePictures");
                 }
 
-                return EditUserResult.Success;
+                return ServiceResult<EditUserResult>.Success();
             }
             catch
             {
@@ -218,8 +268,9 @@ namespace ShopStock.Application.Services.Implementations
                     imageService.DeleteImage(newProfilePicture, "ProfilePictures");
                 }
 
-                return EditUserResult.EditFailed;
+                return ServiceResult<EditUserResult>.Failure(EditUserResult.EditFailed);
             }
+            #endregion
         }
 
         #endregion

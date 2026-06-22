@@ -4,10 +4,13 @@
     {
         Success,
         UserNotFound,
-        DuplicateUserName,
-        DuplicateEmail,
-        DuplicateMobile,
-        InvalidInputs,
-        EditFailed
+        EmailRequired,
+        UserNameRequired,
+        UserNameDuplicated,
+        EmailDuplicated,
+        MobileDuplicated,
+        EditFailed,
+        RoleRequired,
+        InvalidImage
     }
 }

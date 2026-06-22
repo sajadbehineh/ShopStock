@@ -56,13 +56,13 @@
 
     <ul class="menu-inner py-1">
         <!-- Dashboards -->
-        <li class="menu-item active open">
+        <li class="menu-item ">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="menu-icon tf-icons bx bx-home-circle"></i>
                 <div data-i18n="Dashboards">داشبوردها</div>
             </a>
             <ul class="menu-sub">
-                <li class="menu-item active">
+                <li class="menu-item ">
                     <a href="dashboards-analytics.html" class="menu-link">
                         <div data-i18n="Analytics">تحلیل‌ها</div>
                     </a>
@@ -100,9 +100,49 @@
                         <div>افزودن کاربر</div>
                     </a>
                 </li>
-
             </ul>
         </li>
+       @*  <li class="menu-item active open">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div>مدیریت کاربران</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-area="Admin" asp-controller="User" asp-action="Index" class="menu-link">
+                        <div>لیست کاربران</div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-area="Admin" asp-controller="User" asp-action="Create" class="menu-link">
+                        <div>افزودن کاربر</div>
+                    </a>
+                </li>
+            </ul>
+        </li> *@
+
+        @* <li class="menu-item">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="menu-icon tf-icons bx bx-user"></i>
+                <div data-i18n="مدیریت کاربران"></div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item">
+                    <a asp-area="Admin"
+                       asp-controller="User"
+                       asp-action="Index" class="menu-link">
+                        <div data-i18n="لیست کاربران"></div>
+                    </a>
+                </li>
+                <li class="menu-item">
+                    <a asp-area="Admin"
+                       asp-controller="User"
+                       asp-action="Create" class="menu-link">
+                        <div data-i18n="افزودن کاربر"></div>
+                    </a>
+                </li>
+            </ul>
+        </li> *@
         <!-- Layouts -->
         <li class="menu-item">
             <a href="javascript:void(0);" class="menu-link menu-toggle">

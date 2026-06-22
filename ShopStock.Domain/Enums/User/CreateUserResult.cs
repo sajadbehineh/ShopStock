@@ -4,10 +4,14 @@
     {
         Success,
         SaveFailed,
+        EmailRequired,
+        UserNameRequired,
+        PasswordRequired,
         EmailDuplicated,
         UserNameDuplicated,
         MobileDuplicated,
         InvalidPicture,
-        InvalidData
+        RoleRequired,
+        InvalidImage
     }
 }

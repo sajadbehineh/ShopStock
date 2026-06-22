@@ -13,6 +13,6 @@
         public Stream? ImageStream { get; set; }
         public bool IsActive { get; set; }
 
-        public List<int>? UserSelectedRoles { get; set; }
+        public List<int> UserSelectedRoles { get; set; } = new();
     }
 }

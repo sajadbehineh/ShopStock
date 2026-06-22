@@ -70,7 +70,7 @@ namespace ShopStock.Infra.Data.Repositories
             {
                 return await context.Users.AnyAsync(u => u.Email == email);
             }
-            return await context.Users.AnyAsync(u => u.Id == excludeUserId && !u.IsDeleted && u.Email == email);
+            return await context.Users.AnyAsync(u => u.Id != excludeUserId && !u.IsDeleted && u.Email == email);
         }
 
         public async Task<bool> IsMobileExistsAsync(string mobile, int? excludeUserId)
@@ -79,7 +79,7 @@ namespace ShopStock.Infra.Data.Repositories
             {
                 return await context.Users.AnyAsync(u => u.Mobile == mobile);
             }
-            return await context.Users.AnyAsync(u => u.Id == excludeUserId && !u.IsDeleted && u.Mobile == mobile);
+            return await context.Users.AnyAsync(u => u.Id != excludeUserId && !u.IsDeleted && u.Mobile == mobile);
         }
 
         public async Task<User?> GetUserByActiveCodeAsync(string activeCode)
